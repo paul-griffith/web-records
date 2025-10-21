@@ -110,23 +110,50 @@ This creates a `dist/` folder with optimized files ready for deployment.
 
 ## Deployment to GitHub Pages
 
+### Automatic Deployment (Recommended)
+
+This project includes GitHub Actions for automatic deployment. Simply:
+
+1. **Push to main branch:**
+   ```bash
+   git add .
+   git commit -m "Your commit message"
+   git push origin main
+   ```
+
+2. **Enable GitHub Pages in your repository:**
+   - Go to your repository on GitHub
+   - Navigate to **Settings** > **Pages**
+   - Under "Source", select **GitHub Actions**
+   - Save the settings
+
+3. **Monitor deployment:**
+   - Go to the **Actions** tab in your repository
+   - Watch the "Deploy to GitHub Pages" workflow run
+   - Once complete, your site will be live at `https://yourusername.github.io/web-records/`
+
+The GitHub Action will:
+- Automatically trigger on every push to `main`
+- Install dependencies
+- Build the production bundle
+- Deploy to GitHub Pages
+- Complete in ~2-3 minutes
+
+### Manual Deployment (Alternative)
+
+If you prefer manual deployment:
+
 1. Build the production version:
    ```bash
    npm run build
    ```
 
-2. Deploy the `dist/` folder to GitHub Pages:
+2. Deploy using gh-pages branch:
    ```bash
-   # If using gh-pages branch
    git subtree push --prefix dist origin gh-pages
-
-   # Or use GitHub Pages settings to deploy from dist/ folder
    ```
 
-3. Configure GitHub repository settings:
-   - Go to Settings > Pages
-   - Set source to the gh-pages branch or docs folder
-   - Save and wait for deployment
+3. Configure GitHub Pages to use the `gh-pages` branch
 
 ## Privacy & Security
 
