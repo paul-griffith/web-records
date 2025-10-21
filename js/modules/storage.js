@@ -57,7 +57,7 @@ export const Storage = {
 
   // Model selection
   getTranscriptionModel() {
-    return localStorage.getItem(STORAGE_KEYS.MODEL_TRANSCRIPTION) || 'gemini-2.0-flash-exp';
+    return localStorage.getItem(STORAGE_KEYS.MODEL_TRANSCRIPTION) || 'gemini-2.5-flash';
   },
 
   setTranscriptionModel(model) {
@@ -65,7 +65,7 @@ export const Storage = {
   },
 
   getSOAPModel() {
-    return localStorage.getItem(STORAGE_KEYS.MODEL_SOAP) || 'gemini-2.0-flash-exp';
+    return localStorage.getItem(STORAGE_KEYS.MODEL_SOAP) || 'gemini-2.5-pro';
   },
 
   setSOAPModel(model) {

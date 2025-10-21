@@ -2,14 +2,14 @@
  * Gemini API client for transcription and SOAP generation
  */
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 
 export class GeminiClient {
   constructor(apiKey) {
     if (!apiKey) {
       throw new Error('API key is required');
     }
-    this.genAI = new GoogleGenerativeAI(apiKey);
+    this.genAI = new GoogleGenAI({ apiKey });
   }
 
   /**
@@ -43,33 +43,47 @@ export class GeminiClient {
    * Transcribe audio to text using Gemini
    * @param {Blob} audioBlob - Audio data
    * @param {string} mimeType - MIME type of audio
-   * @param {string} modelName - Model to use (default: gemini-2.0-flash-exp)
+   * @param {string} modelName - Model to use (default: gemini-2.5-flash)
    * @returns {Promise<string>} Transcribed text
    */
-  async transcribeAudio(audioBlob, mimeType, modelName = 'gemini-2.0-flash-exp') {
+  async transcribeAudio(audioBlob, mimeType, modelName = 'gemini-2.5-flash') {
     try {
-      const model = this.genAI.getGenerativeModel({ model: modelName });
-
       // Convert blob to base64
       const base64Audio = await this.blobToBase64(audioBlob);
       const geminiMimeType = this.getGeminiMimeType(mimeType);
 
       // Prepare the prompt and audio data
-      const prompt = `Transcribe this veterinary consultation audio into text. Include all spoken content accurately, preserving medical terminology. Format as plain text without adding any commentary or notes.`;
+      const prompt = `Transcribe this veterinary consultation audio into text.
+        Include all spoken content accurately, preserving medical terminology.
+        Format as plain text without adding any commentary or notes.
+        Spoken punctuation or formatting guidelines (such as "enter" or "period") should be interpreted before output, not returned verbatim.
+        Common abbreviations included Loomis Basin Veterinary Clinic (LBVC), coughing/sneezing/vomiting/diarrhea (C/S/V/D), patient as P, owner as O.`;
 
-      const imageParts = [
-        {
-          inlineData: {
-            data: base64Audio,
-            mimeType: geminiMimeType
+      // Generate transcription using new API
+      const response = await this.genAI.models.generateContent({
+        model: modelName,
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              {
+                inlineData: {
+                  data: base64Audio,
+                  mimeType: geminiMimeType
+                }
+              }
+            ]
           }
-        }
-      ];
+        ],
+        config: {
+          thinkingConfig: {
+            thinkingBudget: 0,
+          },
+          systemInstruction: prompt,
+        },
+      });
 
-      // Generate transcription
-      const result = await model.generateContent([prompt, ...imageParts]);
-      const response = await result.response;
-      const text = response.text();
+      const text = response.text;
 
       if (!text || text.trim().length === 0) {
         throw new Error('Transcription returned empty result');
@@ -93,23 +107,31 @@ export class GeminiClient {
    * Generate SOAP note from transcript using Gemini
    * @param {string} transcript - Transcribed text
    * @param {string} systemPrompt - System prompt for SOAP generation
-   * @param {string} modelName - Model to use (default: gemini-2.0-flash-exp)
+   * @param {string} modelName - Model to use (default: gemini-2.5-flash)
    * @returns {Promise<string>} SOAP note in Markdown format
    */
-  async generateSOAP(transcript, systemPrompt, modelName = 'gemini-2.0-flash-exp') {
+  async generateSOAP(transcript, systemPrompt, modelName = 'gemini-2.5-pro') {
     try {
-      const model = this.genAI.getGenerativeModel({ model: modelName });
+      const response = await this.genAI.models.generateContent({
+        model: modelName,
+        contents: [
+          {
+            role: "user",
+            parts: [
+              { text: "The user's transcription follows:"},
+              { text: transcript }
+            ],
+          },
+        ],
+        config: {
+          // thinkingConfig: {
+          //   thinkingBudget: -1,
+          // },
+          systemInstruction: systemPrompt,
+        },
+      });
 
-      // Combine system prompt with transcript
-      const fullPrompt = `${systemPrompt}
-
-Transcript:
-${transcript}`;
-
-      // Generate SOAP note
-      const result = await model.generateContent(fullPrompt);
-      const response = await result.response;
-      const text = response.text();
+      const text = response.text;
 
       if (!text || text.trim().length === 0) {
         throw new Error('SOAP generation returned empty result');
@@ -133,10 +155,11 @@ ${transcript}`;
    */
   async testApiKey() {
     try {
-      const model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
-      const result = await model.generateContent('Hello');
-      await result.response;
-      return true;
+      const response = await this.genAI.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: 'Hello'
+      });
+      return response && response.text;
     } catch (error) {
       return false;
     }
