@@ -43,10 +43,10 @@ export class GeminiClient {
    * Transcribe audio to text using Gemini
    * @param {Blob} audioBlob - Audio data
    * @param {string} mimeType - MIME type of audio
-   * @param {string} modelName - Model to use (default: gemini-2.5-flash)
+   * @param {string} modelName - Model to use
    * @returns {Promise<string>} Transcribed text
    */
-  async transcribeAudio(audioBlob, mimeType, modelName = 'gemini-2.5-flash') {
+  async transcribeAudio(audioBlob, mimeType, modelName) {
     try {
       // Convert blob to base64
       const base64Audio = await this.blobToBase64(audioBlob);
@@ -107,10 +107,10 @@ export class GeminiClient {
    * Generate SOAP note from transcript using Gemini
    * @param {string} transcript - Transcribed text
    * @param {string} systemPrompt - System prompt for SOAP generation
-   * @param {string} modelName - Model to use (default: gemini-2.5-flash)
+   * @param {string} modelName - Model to use
    * @returns {Promise<string>} SOAP note in Markdown format
    */
-  async generateSOAP(transcript, systemPrompt, modelName = 'gemini-2.5-pro') {
+  async generateSOAP(transcript, systemPrompt, modelName) {
     try {
       const response = await this.genAI.models.generateContent({
         model: modelName,
