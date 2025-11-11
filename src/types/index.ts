@@ -28,8 +28,6 @@ export enum AppState {
 export interface StorageKeys {
   API_KEY: string;
   SYSTEM_PROMPT: string;
-  MODEL_TRANSCRIPTION: string;
-  MODEL_SOAP: string;
   CURRENT_SESSION: string;
   SESSION_HISTORY: string;
   SELECTED_TEMPLATE: string;

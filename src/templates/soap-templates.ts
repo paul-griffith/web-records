@@ -13,6 +13,24 @@ export const SOAP_TEMPLATES: SOAPTemplate[] = [
     content: ''
   },
   {
+    'id': 'SOAP',
+    name: 'SOAP Template',
+    description: "General SOAP template for various veterinary consultations",
+    content: `
+## Subjective:
+- Patient history, owner concerns, symptoms reported
+
+## Objective:
+- Physical exam findings, vital signs, observable data
+
+## Assessment:
+- Diagnosis or differential diagnoses
+
+## Plan:
+- Treatment plan, medications, follow-up instructions
+`
+  },
+  {
     id: 'inpatient-assessment',
     name: 'Inpatient Assessment',
     description: 'Standard inpatient assessment template',

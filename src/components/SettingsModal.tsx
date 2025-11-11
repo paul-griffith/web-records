@@ -10,7 +10,7 @@ import { Storage } from '../modules/storage';
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (apiKey: string, model: string, systemPrompt: string) => void;
+  onSave: (apiKey: string, systemPrompt: string) => void;
   onTestApiKey: (apiKey: string) => Promise<boolean>;
 }
 
@@ -21,7 +21,6 @@ export function SettingsModal({
   onTestApiKey
 }: SettingsModalProps) {
   const [apiKey, setApiKey] = useState<string>('');
-  const [model, setModel] = useState<string>('gemini-2.5-flash');
   const [systemPrompt, setSystemPrompt] = useState<string>('');
   const [testResult, setTestResult] = useState<string | null>(null);
 
@@ -29,7 +28,6 @@ export function SettingsModal({
   useEffect(() => {
     if (isOpen) {
       setApiKey(Storage.getApiKey());
-      setModel(Storage.getSOAPModel());
       setSystemPrompt(Storage.getSystemPrompt());
       setTestResult(null);
     }
@@ -42,10 +40,6 @@ export function SettingsModal({
   const handleApiKeyChange = (e: JSX.TargetedEvent<HTMLInputElement>) => {
     setApiKey(e.currentTarget.value);
     setTestResult(null);
-  };
-
-  const handleModelChange = (e: JSX.TargetedEvent<HTMLSelectElement>) => {
-    setModel(e.currentTarget.value);
   };
 
   const handleSystemPromptChange = (e: JSX.TargetedEvent<HTMLTextAreaElement>) => {
@@ -76,7 +70,7 @@ export function SettingsModal({
   };
 
   const handleSave = () => {
-    onSave(apiKey, model, systemPrompt);
+    onSave(apiKey, systemPrompt);
     onClose();
   };
 
@@ -126,20 +120,6 @@ export function SettingsModal({
                 Google AI Studio
               </a>
             </p>
-          </div>
-
-          {/* Model Selection */}
-          <div className="form-group">
-            <label htmlFor="model-select">Model</label>
-            <select
-              id="model-select"
-              className="input-field"
-              value={model}
-              onChange={handleModelChange}
-            >
-              <option value="gemini-2.5-flash">Gemini 2.5 Flash (Recommended)</option>
-              <option value="gemini-2.5-pro">Gemini 2.5 Pro (More expensive, "smarter")</option>
-            </select>
           </div>
 
           {/* System Prompt */}

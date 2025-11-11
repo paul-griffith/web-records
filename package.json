@@ -1,16 +1,10 @@
 {
   "name": "web-records",
   "version": "0.1.0",
-  "description": "Veterinary SOAP note generator using audio transcription and AI analysis",
+  "description": "Veterinary medical record transcription assistant",
   "private": true,
-  "keywords": [
-    "veterinary",
-    "soap-notes",
-    "transcription",
-    "gemini"
-  ],
   "license": "MIT",
-  "author": "",
+  "author": "Paul Griffith",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack serve --open --config webpack.config.dev.js",

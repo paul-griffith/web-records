@@ -110,11 +110,9 @@ export function App() {
         throw new Error('Gemini client not initialized');
       }
 
-      const model = Storage.getTranscriptionModel();
       const transcribedText = await geminiClient.transcribeAudio(
         audioData.blob,
         audioData.mimeType,
-        model
       );
 
       setTranscript(transcribedText);
@@ -147,7 +145,6 @@ export function App() {
         throw new Error('Gemini client not initialized');
       }
 
-      const model = Storage.getSOAPModel();
       const systemPrompt = Storage.getSystemPrompt();
 
       // Get template content from current selection
@@ -157,10 +154,9 @@ export function App() {
       // Save the template selection to storage
       Storage.setSelectedTemplate(selectedTemplate);
 
-      const soapText = await geminiClient.generateSOAP(
+      const soapText = await geminiClient.generateNote(
         transcript,
         systemPrompt,
-        model,
         templateContent
       );
 
@@ -218,9 +214,8 @@ export function App() {
     setIsSettingsOpen(false);
   };
 
-  const handleSettingsSave = (newApiKey: string, model: string, systemPrompt: string) => {
+  const handleSettingsSave = (newApiKey: string, systemPrompt: string) => {
     Storage.setApiKey(newApiKey);
-    Storage.setSOAPModel(model);
     Storage.setSystemPrompt(systemPrompt);
 
     setGeminiClient(new GeminiClient(newApiKey));

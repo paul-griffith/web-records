@@ -49,7 +49,7 @@ export function RecordingSection({
 
   return (
     <section id="step-recording" className="card">
-      <h2>Step 1: Record Consultation</h2>
+      <h2>Record Consultation</h2>
       <div className="recording-controls">
         {!isRecording ? (
           <Button
@@ -73,9 +73,6 @@ export function RecordingSection({
           <span id="recording-timer">{formatTime(recordingTime)}</span>
         </div>
       )}
-      <div id="recording-info" className="info-text">
-        Click "Start Recording" to begin capturing audio from your microphone.
-      </div>
     </section>
   );
 }

@@ -29,13 +29,9 @@ export function TranscriptSection({
 }: TranscriptSectionProps) {
   const isTranscribing = appState === AppState.TRANSCRIBING;
   const isTranscriptReady = appState === AppState.TRANSCRIPT_READY;
-  const isVisible = isTranscribing || isTranscriptReady;
+  const hasTranscript = transcript.length > 0;
 
   const templates = getAllTemplates();
-
-  if (!isVisible) {
-    return <section id="step-transcript" className="card hidden"></section>;
-  }
 
   const handleTextAreaChange = (e: JSX.TargetedEvent<HTMLTextAreaElement>) => {
     onTranscriptChange(e.currentTarget.value);
@@ -47,13 +43,13 @@ export function TranscriptSection({
 
   return (
     <section id="step-transcript" className="card">
-      <h2>Step 2: Review Transcript</h2>
+      <h2>Review Transcript</h2>
 
       {isTranscribing && (
         <Loading message="Transcribing audio..." />
       )}
 
-      {isTranscriptReady && (
+      {!isTranscribing && (
         <div id="transcript-content">
           <textarea
             id="transcript-text"
@@ -87,12 +83,14 @@ export function TranscriptSection({
             <Button
               className="btn btn-secondary"
               onClick={onReRecord}
+              disabled={!hasTranscript}
             >
               Re-record
             </Button>
             <Button
               className="btn btn-primary"
               onClick={onGenerateSOAP}
+              disabled={!isTranscriptReady}
             >
               Generate SOAP Note
             </Button>

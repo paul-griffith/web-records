@@ -2,7 +2,11 @@
  * Gemini API client for transcription and SOAP generation
  */
 
-import { GoogleGenAI } from '@google/genai';
+import {GoogleGenAI} from '@google/genai';
+import {abbreviations} from "./abbreviations";
+
+const transcriptionModel = 'gemini-2.5-flash';
+const analysisModel = 'gemini-2.5-pro';
 
 export class GeminiClient {
   private genAI: GoogleGenAI;
@@ -51,7 +55,6 @@ export class GeminiClient {
   async transcribeAudio(
     audioBlob: Blob,
     mimeType: string,
-    modelName: string
   ): Promise<string> {
     try {
       // Convert blob to base64
@@ -63,11 +66,11 @@ export class GeminiClient {
         Include all spoken content accurately, preserving medical terminology.
         Format as plain text without adding any commentary or notes.
         Spoken punctuation or formatting guidelines (such as "enter" or "period") should be interpreted before output, not returned verbatim.
-        Common abbreviations included Loomis Basin Veterinary Clinic (LBVC), coughing/sneezing/vomiting/diarrhea (C/S/V/D), patient as P, owner as O.`;
+        Common abbreviations include ${Array.from(abbreviations.entries()).map(([key, value]) => `${key}: ${value}`).join(', ')}`;
 
       // Generate transcription using new API
       const response = await this.genAI.models.generateContent({
-        model: modelName,
+        model: transcriptionModel,
         contents: [
           {
             role: 'user',
@@ -109,17 +112,15 @@ export class GeminiClient {
   }
 
   /**
-   * Generate SOAP note from transcript using Gemini
-   * @param transcript - Transcribed text
-   * @param systemPrompt - System prompt for SOAP generation
-   * @param modelName - Model to use
+   * Generate medical note from transcript
+   * @param transcript - User's raw transcription
+   * @param systemPrompt - System prompt for note generation
    * @param templateContent - Optional template content to include as context
    * @returns SOAP note in Markdown format
    */
-  async generateSOAP(
+  async generateNote(
     transcript: string,
     systemPrompt: string,
-    modelName: string,
     templateContent?: string
   ): Promise<string> {
     try {
@@ -132,14 +133,14 @@ export class GeminiClient {
       // Add template if provided
       if (templateContent && templateContent.trim().length > 0) {
         userParts.unshift(
-          { text: "Use the following template as a guide for structuring the SOAP note:" },
+          { text: "Use the following template as a guide for structuring the note:" },
           { text: templateContent },
           { text: "\n---\n" }
         );
       }
 
       const response = await this.genAI.models.generateContent({
-        model: modelName,
+        model: analysisModel,
         contents: [
           {
             role: "user",
@@ -181,7 +182,7 @@ export class GeminiClient {
   async testApiKey(): Promise<boolean> {
     try {
       const response = await this.genAI.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: transcriptionModel,
         contents: 'Hello'
       });
       return !!(response && response.text);

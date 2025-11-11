@@ -8,23 +8,18 @@ import { Session, StorageKeys } from '../types';
 const STORAGE_KEYS: StorageKeys = {
   API_KEY: 'gemini_api_key',
   SYSTEM_PROMPT: 'system_prompt',
-  MODEL_TRANSCRIPTION: 'model_transcription',
-  MODEL_SOAP: 'model_soap',
   CURRENT_SESSION: 'current_session',
   SESSION_HISTORY: 'session_history',
   SELECTED_TEMPLATE: 'selected_template'
 };
 
 // Default system prompt for SOAP generation
-const DEFAULT_SYSTEM_PROMPT = `You are a veterinary medical assistant. Convert the following veterinary consultation transcript into a structured SOAP note format.
+const DEFAULT_SYSTEM_PROMPT = `You are a veterinary medical assistant.
+Convert the following veterinary consultation transcript into a structured format.
 
-SOAP Format:
-- **Subjective**: Patient history, owner concerns, symptoms reported
-- **Objective**: Physical exam findings, vital signs, observable data
-- **Assessment**: Diagnosis or differential diagnoses
-- **Plan**: Treatment plan, medications, follow-up instructions
-
-Format your response in clean Markdown with clear section headers. Be concise but thorough. Use professional veterinary terminology.`;
+Format your response in clean Markdown with clear section headers.
+Be concise but thorough.
+Use professional veterinary terminology.`;
 
 export const Storage = {
   // API Key management
@@ -60,23 +55,6 @@ export const Storage = {
 
   getDefaultSystemPrompt(): string {
     return DEFAULT_SYSTEM_PROMPT;
-  },
-
-  // Model selection
-  getTranscriptionModel(): string {
-    return localStorage.getItem(STORAGE_KEYS.MODEL_TRANSCRIPTION) || 'gemini-2.5-flash';
-  },
-
-  setTranscriptionModel(model: string): void {
-    localStorage.setItem(STORAGE_KEYS.MODEL_TRANSCRIPTION, model);
-  },
-
-  getSOAPModel(): string {
-    return localStorage.getItem(STORAGE_KEYS.MODEL_SOAP) || 'gemini-2.5-pro';
-  },
-
-  setSOAPModel(model: string): void {
-    localStorage.setItem(STORAGE_KEYS.MODEL_SOAP, model);
   },
 
   // Template selection

@@ -29,19 +29,18 @@ export function SOAPSection({
   const richTextEditorRef = useRef<RichTextEditor | null>(null);
 
   const isGenerating = appState === AppState.GENERATING_SOAP;
-  const isReady = appState === AppState.SOAP_READY;
-  const isVisible = isGenerating || isReady;
+  const hasContent = soapHTML.length > 0;
 
-  // Initialize RichTextEditor when ready
+  // Initialize RichTextEditor when component mounts
   useEffect(() => {
-    if (isReady && editorRef.current && toolbarRef.current && statsRef.current && !richTextEditorRef.current) {
+    if (editorRef.current && toolbarRef.current && statsRef.current && !richTextEditorRef.current) {
       richTextEditorRef.current = new RichTextEditor(
         editorRef.current,
         toolbarRef.current,
         statsRef.current
       );
     }
-  }, [isReady]);
+  }, []);
 
   // Update editor content when soapHTML changes
   useEffect(() => {
@@ -49,10 +48,6 @@ export function SOAPSection({
       richTextEditorRef.current.setHTML(soapHTML);
     }
   }, [soapHTML]);
-
-  if (!isVisible) {
-    return <section id="step-soap" className="card hidden"></section>;
-  }
 
   const handleCopy = async () => {
     if (richTextEditorRef.current) {
@@ -71,13 +66,13 @@ export function SOAPSection({
 
   return (
     <section id="step-soap" className="card">
-      <h2>Step 3: SOAP Note</h2>
+      <h2>SOAP Note</h2>
 
       {isGenerating && (
         <Loading message="Generating SOAP note..." />
       )}
 
-      {isReady && (
+      {!isGenerating && (
         <div id="soap-content">
           {/* Formatting Toolbar */}
           <div id="soap-toolbar" className="editor-toolbar" ref={toolbarRef}>
@@ -146,18 +141,21 @@ export function SOAPSection({
             <Button
               className="btn btn-secondary"
               onClick={onRegenerate}
+              disabled={!hasContent}
             >
               Regenerate
             </Button>
             <Button
               className="btn btn-success"
               onClick={handleCopy}
+              disabled={!hasContent}
             >
               Copy as HTML
             </Button>
             <Button
               className="btn btn-secondary"
               onClick={handleSave}
+              disabled={!hasContent}
             >
               Save
             </Button>
