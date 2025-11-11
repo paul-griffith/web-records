@@ -1,5 +1,6 @@
 import {GoogleGenAI} from '@google/genai';
-import {abbreviations} from "./abbreviations";
+
+import {abbreviations} from "../templates/abbreviations";
 
 const transcriptionModel = 'gemini-2.5-flash';
 const analysisModel = 'gemini-2.5-pro';
@@ -45,7 +46,6 @@ export class GeminiClient {
    * Transcribe audio to text using Gemini
    * @param audioBlob - Audio data
    * @param mimeType - MIME type of audio
-   * @param modelName - Model to use
    * @returns Transcribed text
    */
   async transcribeAudio(
