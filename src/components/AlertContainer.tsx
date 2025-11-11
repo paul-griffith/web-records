@@ -1,7 +1,3 @@
-/**
- * Alert/notification container
- */
-
 import { AlertType } from '../types';
 
 interface AlertContainerProps {

@@ -1,22 +1,11 @@
-/**
- * Predefined SOAP note templates
- * These templates provide structured formats and examples for different types of veterinary visits
- */
+import {Template} from '../types';
 
-import { SOAPTemplate } from '../types';
-
-export const SOAP_TEMPLATES: SOAPTemplate[] = [
-  {
-    id: 'none',
-    name: 'No Template',
-    description: 'Generate SOAP note without a specific template',
-    content: ''
-  },
-  {
-    'id': 'SOAP',
-    name: 'SOAP Template',
-    description: "General SOAP template for various veterinary consultations",
-    content: `
+export const TEMPLATES: Map<string, Template> = new Map([
+  ['none', {name: 'No Template', content: ''}],
+  ['SOAP',
+    {
+      name: 'SOAP Template',
+      content: `
 ## Subjective:
 - Patient history, owner concerns, symptoms reported
 
@@ -29,12 +18,11 @@ export const SOAP_TEMPLATES: SOAPTemplate[] = [
 ## Plan:
 - Treatment plan, medications, follow-up instructions
 `
-  },
-  {
-    id: 'inpatient-assessment',
-    name: 'Inpatient Assessment',
-    description: 'Standard inpatient assessment template',
-    content: `
+    }],
+  ['inpatient-assessment',
+    {
+      name: 'Inpatient Assessment',
+      content: `
 ## CURRENT TREATMENTS:
 1. Fluids
 2. Nutrition: RER = ____kcal/d, feeding RC GI LF liquid (0.9kcal/mL) or RC Recovery (0.9kcal/mL) or RC renal liquid (1.3 kcal/mL dog, 0.9kcal/mL cat)
@@ -63,11 +51,9 @@ export const SOAP_TEMPLATES: SOAPTemplate[] = [
 **AM ASSESSMENT / OWNER COMMUNICATION:**
 **TTO ([ClientFirstName], phone) @ ___ :** ___
 `,
-  },
-  {
-    id: 'inpatient-plan',
+    }],
+  ['inpatient-plan', {
     name: 'Inpatient Plan',
-    description: 'Standard inpatient plan template',
     content: `
 ## Monitoring:
 - See Instinct monitoring sheet
@@ -78,11 +64,9 @@ export const SOAP_TEMPLATES: SOAPTemplate[] = [
 ## PM changes/assessment/update:
 - Adjust IVF, pain meds, nutrition, labs?
 `,
-  },
-  {
-    id: 'canine-wellness',
+  }],
+  ['canine-wellness', {
     name: 'Canine Wellness Exam',
-    description: 'Standard wellness/preventive care visit template',
     content: `
 ## Client Communication:
 
@@ -107,11 +91,9 @@ Bordetella/CPIV/CAV-2 - administered intranasally.
 Medications:
 OK to refill preventative products with annual exam.
     `
-  },
-  {
-    id: 'feline-wellness',
+  }],
+  ['feline-wellness', {
     name: 'Feline Wellness Exam',
-    description: 'Standard wellness/preventive care visit template',
     content: `
 ## Client Communication:
 
@@ -134,11 +116,9 @@ OK to refill preventative products with annual exam.
 
 OK to refill preventative products with annual exam.
 `,
-  },
-  {
-    id: 'kitten-plan',
+  }],
+  ['kitten-plan', {
     name: "Kitten Plan",
-    description: 'Standard wellness/preventive care visit template',
     content: `
 ## Discussed kitten care with O:
 - Vaccine schedule - Core (FVRCP, Rabies) vs. non-core (FeLV in cats >1 yr)
@@ -169,19 +149,9 @@ OK to refill preventative products with annual exam.
 
 OK to refill preventative products with annual exam.
 `,
-  }
-];
+  }]
+]);
 
-/**
- * Get template by ID
- */
-export function getTemplateById(id: string): SOAPTemplate | undefined {
-  return SOAP_TEMPLATES.find(t => t.id === id);
-}
-
-/**
- * Get all available templates
- */
-export function getAllTemplates(): SOAPTemplate[] {
-  return SOAP_TEMPLATES;
+export function getTemplateById(id: string): Template | undefined {
+  return TEMPLATES.get(id);
 }

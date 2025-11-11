@@ -5,9 +5,8 @@
 import { useState, useEffect } from 'preact/hooks';
 import { Header } from './Header';
 import { AlertContainer } from './AlertContainer';
-import { RecordingSection } from './RecordingSection';
 import { TranscriptSection } from './TranscriptSection';
-import { SOAPSection } from './SOAPSection';
+import { AnalysisSection } from './AnalysisSection';
 import { SettingsModal } from './SettingsModal';
 import { Storage } from '../modules/storage';
 import { GeminiClient } from '../modules/gemini-client';
@@ -15,7 +14,7 @@ import { AudioRecorder } from '../modules/audio-recorder';
 import { renderMarkdown } from '../utils/markdown-renderer';
 import { copyHTMLToClipboard } from '../utils/clipboard';
 import { AppState, AlertType } from '../types';
-import { getTemplateById } from '../templates/soap-templates';
+import { getTemplateById } from '../templates/templates';
 
 export function App() {
   // Application state
@@ -59,7 +58,7 @@ export function App() {
       if (savedSession.soap && savedSession.soapHTML) {
         setSOAPMarkdown(savedSession.soap);
         setSOAPHTML(savedSession.soapHTML);
-        setAppState(AppState.SOAP_READY);
+        setAppState(AppState.ANALYSIS_READY);
       }
     }
   }, []);
@@ -88,7 +87,7 @@ export function App() {
   };
 
   // Recording handlers
-  const handleStartRecording = async () => {
+  const handleStartRecording = async (_getCursorPosition: () => number) => {
     try {
       await audioRecorder.initialize();
       audioRecorder.start();
@@ -100,7 +99,7 @@ export function App() {
     }
   };
 
-  const handleStopRecording = async () => {
+  const handleStopRecording = async (getCursorPosition: () => number, setSelectionRange: (start: number, end: number) => void) => {
     try {
       const audioData = await audioRecorder.stop();
       setAppState(AppState.TRANSCRIBING);
@@ -115,9 +114,21 @@ export function App() {
         audioData.mimeType,
       );
 
-      setTranscript(transcribedText);
+      // Insert at cursor position instead of replacing
+      const cursorPos = getCursorPosition();
+      const before = transcript.slice(0, cursorPos);
+      const after = transcript.slice(cursorPos);
+      const newTranscript = before + transcribedText + after;
+
+      setTranscript(newTranscript);
       setAppState(AppState.TRANSCRIPT_READY);
-      showAlert('Transcription complete!', 'success');
+      showAlert('Transcription inserted!', 'success');
+
+      // Set cursor after inserted text
+      const newCursorPos = cursorPos + transcribedText.length;
+      setTimeout(() => {
+        setSelectionRange(newCursorPos, newCursorPos);
+      }, 0);
 
       // Cleanup
       audioRecorder.cleanup();
@@ -128,18 +139,9 @@ export function App() {
     }
   };
 
-  // Transcript handlers
-  const handleReRecord = () => {
-    setTranscript('');
-    setSOAPMarkdown('');
-    setSOAPHTML('');
-    setAppState(AppState.IDLE);
-    Storage.clearCurrentSession();
-  };
-
-  const handleGenerateSOAP = async () => {
+  const handleGenerateNote = async () => {
     try {
-      setAppState(AppState.GENERATING_SOAP);
+      setAppState(AppState.GENERATING);
 
       if (!geminiClient) {
         throw new Error('Gemini client not initialized');
@@ -163,20 +165,15 @@ export function App() {
       setSOAPMarkdown(soapText);
       const html = renderMarkdown(soapText);
       setSOAPHTML(html);
-      setAppState(AppState.SOAP_READY);
-      showAlert('SOAP note generated!', 'success');
+      setAppState(AppState.ANALYSIS_READY);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'SOAP generation failed';
+      const errorMsg = error instanceof Error ? error.message : 'Generation failed';
       showAlert(errorMsg, 'error');
       setAppState(AppState.TRANSCRIPT_READY);
     }
   };
 
   // SOAP handlers
-  const handleRegenerateSOAP = async () => {
-    await handleGenerateSOAP();
-  };
-
   const handleCopySOAP = async (html: string, text: string) => {
     try {
       const success = await copyHTMLToClipboard(html, text);
@@ -233,7 +230,7 @@ export function App() {
   };
 
   return (
-    <div className="container">
+    <div className="app-container">
       <Header onSettingsClick={handleSettingsOpen} />
 
       <AlertContainer
@@ -242,29 +239,29 @@ export function App() {
         onClose={() => setAlertMessage(null)}
       />
 
-      <RecordingSection
-        appState={appState}
-        onStartRecording={handleStartRecording}
-        onStopRecording={handleStopRecording}
-      />
+      <div className="two-column-layout">
+        <div className="left-column">
+          <TranscriptSection
+            appState={appState}
+            transcript={transcript}
+            onTranscriptChange={setTranscript}
+            onStartRecording={handleStartRecording}
+            onStopRecording={handleStopRecording}
+          />
+        </div>
 
-      <TranscriptSection
-        appState={appState}
-        transcript={transcript}
-        selectedTemplate={selectedTemplate}
-        onTranscriptChange={setTranscript}
-        onTemplateChange={setSelectedTemplate}
-        onReRecord={handleReRecord}
-        onGenerateSOAP={handleGenerateSOAP}
-      />
-
-      <SOAPSection
-        appState={appState}
-        soapHTML={soapHTML}
-        onRegenerate={handleRegenerateSOAP}
-        onCopy={handleCopySOAP}
-        onSave={handleSaveSOAP}
-      />
+        <div className="right-column">
+          <AnalysisSection
+            appState={appState}
+            soapHTML={soapHTML}
+            selectedTemplate={selectedTemplate}
+            onTemplateChange={setSelectedTemplate}
+            onGenerateSOAP={handleGenerateNote}
+            onCopy={handleCopySOAP}
+            onSave={handleSaveSOAP}
+          />
+        </div>
+      </div>
 
       <SettingsModal
         isOpen={isSettingsOpen}

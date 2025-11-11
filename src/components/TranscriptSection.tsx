@@ -2,101 +2,115 @@
  * Transcript review section component
  */
 
+import { useRef, useState } from 'preact/hooks';
 import type { JSX } from 'preact';
 import { Button } from './shared/Button';
 import { Loading } from './shared/Loading';
 import { AppState } from '../types';
-import { getAllTemplates } from '../templates/soap-templates';
 
 interface TranscriptSectionProps {
   appState: AppState;
   transcript: string;
-  selectedTemplate: string;
   onTranscriptChange: (value: string) => void;
-  onTemplateChange: (templateId: string) => void;
-  onReRecord: () => void;
-  onGenerateSOAP: () => Promise<void>;
+  onStartRecording: (getCursorPosition: () => number) => Promise<void>;
+  onStopRecording: (getCursorPosition: () => number, setSelectionRange: (start: number, end: number) => void) => Promise<void>;
 }
 
 export function TranscriptSection({
   appState,
   transcript,
-  selectedTemplate,
   onTranscriptChange,
-  onTemplateChange,
-  onReRecord,
-  onGenerateSOAP
+  onStartRecording,
+  onStopRecording
 }: TranscriptSectionProps) {
+  const isRecording = appState === AppState.RECORDING;
   const isTranscribing = appState === AppState.TRANSCRIBING;
-  const isTranscriptReady = appState === AppState.TRANSCRIPT_READY;
-  const hasTranscript = transcript.length > 0;
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [recordingTime, setRecordingTime] = useState<number>(0);
+  const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
 
-  const templates = getAllTemplates();
+  const getCursorPosition = (): number => {
+    return textareaRef.current?.selectionStart ?? transcript.length;
+  };
+
+  const setSelectionRange = (start: number, end: number): void => {
+    textareaRef.current?.setSelectionRange(start, end);
+    textareaRef.current?.focus();
+  };
 
   const handleTextAreaChange = (e: JSX.TargetedEvent<HTMLTextAreaElement>) => {
     onTranscriptChange(e.currentTarget.value);
   };
 
-  const handleTemplateChange = (e: JSX.TargetedEvent<HTMLSelectElement>) => {
-    onTemplateChange(e.currentTarget.value);
+  const handleStartRecording = async () => {
+    await onStartRecording(getCursorPosition);
+
+    // Start timer
+    const id = setInterval(() => {
+      setRecordingTime(prev => prev + 1);
+    }, 1000);
+    setIntervalId(id);
+  };
+
+  const handleStopRecording = async () => {
+    if (intervalId) {
+      clearInterval(intervalId);
+      setIntervalId(null);
+    }
+    setRecordingTime(0);
+    await onStopRecording(getCursorPosition, setSelectionRange);
+  };
+
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
 
   return (
-    <section id="step-transcript" className="card">
-      <h2>Review Transcript</h2>
+    <div className="transcript-section">
+      <div className="section-header">
+        <h2>Transcript</h2>
+        {!isRecording ? (
+          <Button
+            className="btn btn-primary btn-small"
+            onClick={handleStartRecording}
+            disabled={isTranscribing}
+          >
+            {transcript.length > 0 ? 'Insert Recording' : 'Start Recording'}
+          </Button>
+        ) : (
+          <div className="recording-controls-inline">
+            <div className="recording-status-inline">
+              <div className="status-indicator recording"></div>
+              <span className="recording-timer">{formatTime(recordingTime)}</span>
+            </div>
+            <Button
+              className="btn btn-danger btn-small"
+              onClick={handleStopRecording}
+            >
+              Stop Recording
+            </Button>
+          </div>
+        )}
+      </div>
 
       {isTranscribing && (
         <Loading message="Transcribing audio..." />
       )}
 
       {!isTranscribing && (
-        <div id="transcript-content">
+        <div className="transcript-content">
           <textarea
+            ref={textareaRef}
             id="transcript-text"
             className="transcript-editor"
-            placeholder="Transcript will appear here..."
-            rows={12}
+            placeholder="Click 'Start Recording' to begin transcription..."
             value={transcript}
             onInput={handleTextAreaChange}
           />
-
-          <div className="form-group">
-            <label htmlFor="template-select">SOAP Note Template</label>
-            <select
-              id="template-select"
-              className="input-field"
-              value={selectedTemplate}
-              onChange={handleTemplateChange}
-            >
-              {templates.map(template => (
-                <option key={template.id} value={template.id}>
-                  {template.name}
-                </option>
-              ))}
-            </select>
-            <p className="help-text">
-              {templates.find(t => t.id === selectedTemplate)?.description}
-            </p>
-          </div>
-
-          <div className="button-group">
-            <Button
-              className="btn btn-secondary"
-              onClick={onReRecord}
-              disabled={!hasTranscript}
-            >
-              Re-record
-            </Button>
-            <Button
-              className="btn btn-primary"
-              onClick={onGenerateSOAP}
-              disabled={!isTranscriptReady}
-            >
-              Generate SOAP Note
-            </Button>
-          </div>
         </div>
       )}
-    </section>
+    </div>
   );
 }

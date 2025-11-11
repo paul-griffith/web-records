@@ -48,8 +48,7 @@ export function RecordingSection({
   };
 
   return (
-    <section id="step-recording" className="card">
-      <h2>Record Consultation</h2>
+    <div className="recording-section">
       <div className="recording-controls">
         {!isRecording ? (
           <Button
@@ -59,20 +58,20 @@ export function RecordingSection({
             Start Recording
           </Button>
         ) : (
-          <Button
-            className="btn btn-danger"
-            onClick={handleStopRecording}
-          >
-            Stop Recording
-          </Button>
+          <div className="recording-active">
+            <div className="recording-status">
+              <div className="status-indicator recording"></div>
+              <span className="recording-timer">{formatTime(recordingTime)}</span>
+            </div>
+            <Button
+              className="btn btn-danger"
+              onClick={handleStopRecording}
+            >
+              Stop Recording
+            </Button>
+          </div>
         )}
       </div>
-      {isRecording && (
-        <div id="recording-status" className="status-display">
-          <div className="status-indicator recording"></div>
-          <span id="recording-timer">{formatTime(recordingTime)}</span>
-        </div>
-      )}
-    </section>
+    </div>
   );
 }

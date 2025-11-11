@@ -21,8 +21,8 @@ export enum AppState {
   RECORDING = 'recording',
   TRANSCRIBING = 'transcribing',
   TRANSCRIPT_READY = 'transcript_ready',
-  GENERATING_SOAP = 'generating_soap',
-  SOAP_READY = 'soap_ready',
+  GENERATING = 'generating',
+  ANALYSIS_READY = 'analysis_ready',
 }
 
 export interface StorageKeys {
@@ -33,10 +33,8 @@ export interface StorageKeys {
   SELECTED_TEMPLATE: string;
 }
 
-export interface SOAPTemplate {
-  id: string;
+export interface Template {
   name: string;
-  description: string;
   content: string;
 }
 

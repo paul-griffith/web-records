@@ -38,7 +38,7 @@ Core business logic modules:
 - `storage.ts` - LocalStorage abstraction for API keys, prompts, session data, template selection
 
 **2a. Template System (`src/templates/`)**
-- `soap-templates.ts` - Predefined SOAP note templates (wellness exams, sick visits, dental, surgery, rechecks, clinic-specific formats)
+- `templates.ts` - Predefined SOAP note templates (wellness exams, sick visits, dental, surgery, rechecks, clinic-specific formats)
 - Templates provide structured formats and example sections for different visit types
 - Selected template content is passed to Gemini during SOAP generation as additional context
 - Templates are embedded in source code (not user-editable) but can be extended by developers
@@ -119,7 +119,7 @@ Central types defined in `src/types/index.ts`:
 - Commented-out `thinkingConfig` in SOAP generation (line 150-152) - experimental feature
 
 ### Template System Implementation
-- Templates defined as array in `src/templates/soap-templates.ts`
+- Templates defined as array in `src/templates/templates.ts`
 - Each template has: unique ID, display name, description, markdown content
 - Template selection stored in localStorage via `Storage.getSelectedTemplate()`
 - Flow: User selects template in Settings → ID stored → Template content retrieved during SOAP generation → Content prepended to user prompt
@@ -162,7 +162,7 @@ Keys managed by Storage module:
 3. Update component conditional rendering based on appState
 
 ### Adding or Modifying Templates
-1. Edit `src/templates/soap-templates.ts`
+1. Edit `src/templates/templates.ts`
 2. Add new object to `SOAP_TEMPLATES` array with unique ID
 3. Include: id, name (display text), description (help text), content (markdown format)
 4. Template content should show example structure, not rigid requirements
@@ -172,7 +172,7 @@ Keys managed by Storage module:
 Default prompts are in `src/modules/`:
 - Transcription: Hardcoded in `gemini-client.ts:62-66`
 - SOAP generation: `storage.ts:18-26` (DEFAULT_SYSTEM_PROMPT)
-- Templates: Separate from system prompt, defined in `src/templates/soap-templates.ts`
+- Templates: Separate from system prompt, defined in `src/templates/templates.ts`
 
 ### Testing API Changes
 Use the Settings modal's "Test" button - calls `GeminiClient.testApiKey()` which makes a minimal API request to validate the key.

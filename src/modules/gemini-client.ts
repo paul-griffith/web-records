@@ -1,7 +1,3 @@
-/**
- * Gemini API client for transcription and SOAP generation
- */
-
 import {GoogleGenAI} from '@google/genai';
 import {abbreviations} from "./abbreviations";
 
@@ -15,7 +11,7 @@ export class GeminiClient {
     if (!apiKey) {
       throw new Error('API key is required');
     }
-    this.genAI = new GoogleGenAI({ apiKey });
+    this.genAI = new GoogleGenAI({apiKey});
   }
 
   /**
@@ -126,16 +122,21 @@ export class GeminiClient {
     try {
       // Build user message parts
       const userParts: Array<{ text: string }> = [
-        { text: "The user's transcription follows:" },
-        { text: transcript }
+        {
+          text: `The user's transcription follows.
+          Common phrases that should be abbreviated into their short form include
+          ${Array.from(abbreviations.entries()).map(([key, value]) => `${key}: ${value}`).join(', ')}}
+          `
+        },
+        {text: transcript}
       ];
 
       // Add template if provided
       if (templateContent && templateContent.trim().length > 0) {
         userParts.unshift(
-          { text: "Use the following template as a guide for structuring the note:" },
-          { text: templateContent },
-          { text: "\n---\n" }
+          {text: "Use the following template as a guide for structuring the note:"},
+          {text: templateContent},
+          {text: "\n---\n"}
         );
       }
 
