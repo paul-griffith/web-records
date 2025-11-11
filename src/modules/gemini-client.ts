@@ -113,23 +113,37 @@ export class GeminiClient {
    * @param transcript - Transcribed text
    * @param systemPrompt - System prompt for SOAP generation
    * @param modelName - Model to use
+   * @param templateContent - Optional template content to include as context
    * @returns SOAP note in Markdown format
    */
   async generateSOAP(
     transcript: string,
     systemPrompt: string,
-    modelName: string
+    modelName: string,
+    templateContent?: string
   ): Promise<string> {
     try {
+      // Build user message parts
+      const userParts: Array<{ text: string }> = [
+        { text: "The user's transcription follows:" },
+        { text: transcript }
+      ];
+
+      // Add template if provided
+      if (templateContent && templateContent.trim().length > 0) {
+        userParts.unshift(
+          { text: "Use the following template as a guide for structuring the SOAP note:" },
+          { text: templateContent },
+          { text: "\n---\n" }
+        );
+      }
+
       const response = await this.genAI.models.generateContent({
         model: modelName,
         contents: [
           {
             role: "user",
-            parts: [
-              { text: "The user's transcription follows:"},
-              { text: transcript }
-            ],
+            parts: userParts,
           },
         ],
         config: {

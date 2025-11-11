@@ -32,6 +32,14 @@ export interface StorageKeys {
   MODEL_SOAP: string;
   CURRENT_SESSION: string;
   SESSION_HISTORY: string;
+  SELECTED_TEMPLATE: string;
+}
+
+export interface SOAPTemplate {
+  id: string;
+  name: string;
+  description: string;
+  content: string;
 }
 
 export type AlertType = 'error' | 'success' | 'info' | 'warning';

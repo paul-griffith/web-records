@@ -11,7 +11,8 @@ const STORAGE_KEYS: StorageKeys = {
   MODEL_TRANSCRIPTION: 'model_transcription',
   MODEL_SOAP: 'model_soap',
   CURRENT_SESSION: 'current_session',
-  SESSION_HISTORY: 'session_history'
+  SESSION_HISTORY: 'session_history',
+  SELECTED_TEMPLATE: 'selected_template'
 };
 
 // Default system prompt for SOAP generation
@@ -76,6 +77,15 @@ export const Storage = {
 
   setSOAPModel(model: string): void {
     localStorage.setItem(STORAGE_KEYS.MODEL_SOAP, model);
+  },
+
+  // Template selection
+  getSelectedTemplate(): string {
+    return localStorage.getItem(STORAGE_KEYS.SELECTED_TEMPLATE) || 'none';
+  },
+
+  setSelectedTemplate(templateId: string): void {
+    localStorage.setItem(STORAGE_KEYS.SELECTED_TEMPLATE, templateId);
   },
 
   // Current session management (auto-save recovery)

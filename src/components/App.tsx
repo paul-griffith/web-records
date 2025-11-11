@@ -15,6 +15,7 @@ import { AudioRecorder } from '../modules/audio-recorder';
 import { renderMarkdown } from '../utils/markdown-renderer';
 import { copyHTMLToClipboard } from '../utils/clipboard';
 import { AppState, AlertType } from '../types';
+import { getTemplateById } from '../templates/soap-templates';
 
 export function App() {
   // Application state
@@ -22,6 +23,7 @@ export function App() {
   const [transcript, setTranscript] = useState<string>('');
   const [soapMarkdown, setSOAPMarkdown] = useState<string>('');
   const [soapHTML, setSOAPHTML] = useState<string>('');
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('none');
 
   // UI state
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
@@ -43,6 +45,9 @@ export function App() {
       showAlert('Please configure your Gemini API key in settings', 'warning');
       setIsSettingsOpen(true);
     }
+
+    // Load saved template selection
+    setSelectedTemplate(Storage.getSelectedTemplate());
 
     // Attempt to recover session
     const savedSession = Storage.getCurrentSession();
@@ -144,7 +149,20 @@ export function App() {
 
       const model = Storage.getSOAPModel();
       const systemPrompt = Storage.getSystemPrompt();
-      const soapText = await geminiClient.generateSOAP(transcript, systemPrompt, model);
+
+      // Get template content from current selection
+      const template = getTemplateById(selectedTemplate);
+      const templateContent = template?.content || '';
+
+      // Save the template selection to storage
+      Storage.setSelectedTemplate(selectedTemplate);
+
+      const soapText = await geminiClient.generateSOAP(
+        transcript,
+        systemPrompt,
+        model,
+        templateContent
+      );
 
       setSOAPMarkdown(soapText);
       const html = renderMarkdown(soapText);
@@ -238,7 +256,9 @@ export function App() {
       <TranscriptSection
         appState={appState}
         transcript={transcript}
+        selectedTemplate={selectedTemplate}
         onTranscriptChange={setTranscript}
+        onTemplateChange={setSelectedTemplate}
         onReRecord={handleReRecord}
         onGenerateSOAP={handleGenerateSOAP}
       />
