@@ -29,28 +29,28 @@ export const TEMPLATES: Map<string, Template> = new Map([
    * 1/4 RER = _____kcal/d = _____kcal/feeding q4h via NG
    * Aspirate NG tube prior to feeding, follow feedings with ____ mL H2O via NG
    * Offer bland diet to face prior to tube feeding, skip if eats at least ____ kcal on own
-   **DIAGNOSTICS**:
-* **Heska CPP:**
-* **PCV/TS:**
-* **Heska CBC:**
-* **Blood smear** (made directly from patient, not LTT):
+## DIAGNOSTICS:
+* Heska CPP:
+* PCV/TS:
+* Heska CBC:
+* Blood smear (made directly from patient, not LTT):
   * Platelet estimate:
   * 100 WBC cell differential:
   * Other: anisocytosis? polycythemia? intra-/extra-cellular parasites? nRBCs / 100 WBCs?
-  * **NOVA:**
-* **3v AXR / CXR / WBXR report:**
-* **Lactate**:
-* **Doppler / Cardell BP** (#__ cuff on ___L unless otherwise specified) :
+  * NOVA:
+* 3v AXR / CXR / WBXR report:
+* Lactate:
+* Doppler / Cardell BP (#__ cuff on ___L unless otherwise specified) :
   *
-  * **UA:**
-* **FIRSTrack UMIC**:
-* **A/T/GFAST:**
+  * UA:
+* FIRSTrack UMIC:
+* A/T/GFAST:
 
 ## PROBLEM LIST:
 1.
-**AM ASSESSMENT / OWNER COMMUNICATION:**
-**TTO ([ClientFirstName], phone) @ ___ :** ___
-`,
+AM ASSESSMENT / OWNER COMMUNICATION:
+TTO ([ClientFirstName], phone) @ ___ : ___
+`.trim(),
     }],
   ['inpatient-plan', {
     name: 'Inpatient Plan',
@@ -63,7 +63,7 @@ export const TEMPLATES: Map<string, Template> = new Map([
 
 ## PM changes/assessment/update:
 - Adjust IVF, pain meds, nutrition, labs?
-`,
+`.trim(),
   }],
   ['canine-wellness', {
     name: 'Canine Wellness Exam',
@@ -88,9 +88,10 @@ DA2LPP vaccine - administered subcutaneously (left shoulder)
 Leptospirosis vaccine - administered subcutaneously (left shoulder)
 Canine influenza (H3N2/H3N8) - administered subcutaneously (interscapular region)
 Bordetella/CPIV/CAV-2 - administered intranasally.
-Medications:
+
+## Medications:
 OK to refill preventative products with annual exam.
-    `
+`.trim()
   }],
   ['feline-wellness', {
     name: 'Feline Wellness Exam',
@@ -115,7 +116,7 @@ OK to refill preventative products with annual exam.
 ## Medications:
 
 OK to refill preventative products with annual exam.
-`,
+`.trim(),
   }],
   ['kitten-plan', {
     name: "Kitten Plan",
@@ -148,7 +149,7 @@ OK to refill preventative products with annual exam.
 ## Medications:
 
 OK to refill preventative products with annual exam.
-`,
+`.trim(),
   }]
 ]);
 

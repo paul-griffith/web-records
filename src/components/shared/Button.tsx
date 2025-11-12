@@ -2,11 +2,11 @@
  * Reusable Button component
  */
 
-import type { JSX } from 'preact';
+import type {JSX, TargetedMouseEvent} from 'preact';
 
 interface ButtonProps {
   children: JSX.Element | string;
-  onClick?: (e: JSX.TargetedMouseEvent<HTMLButtonElement>) => void;
+  onClick?: (e: TargetedMouseEvent<HTMLButtonElement>) => void;
   className?: string;
   disabled?: boolean;
   type?: 'button' | 'submit' | 'reset';

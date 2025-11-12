@@ -1,16 +1,6 @@
-# Veterinary SOAP Note Generator
+# Veterinary Record Analysis
 
 A client-side web application for veterinary professionals to record consultations, transcribe them using Google Gemini AI, and generate structured SOAP notes.
-
-## Features
-
-- **Audio Recording**: Record veterinary consultations directly in your browser
-- **AI Transcription**: Automatic transcription using Google Gemini's multimodal capabilities
-- **SOAP Note Generation**: Generate structured SOAP (Subjective/Objective/Assessment/Plan) notes from transcripts
-- **Editable Output**: Review and edit both transcripts and SOAP notes before finalizing
-- **Copy to Clipboard**: Copy formatted SOAP notes as HTML for pasting into EMR systems
-- **Privacy-Focused**: All data stays in your browser (no server-side storage)
-- **Bring Your Own Key**: Uses your personal Gemini API key
 
 ## Getting Started
 
@@ -19,26 +9,6 @@ A client-side web application for veterinary professionals to record consultatio
 - Modern web browser (Chrome or Firefox recommended)
 - Google Gemini API key ([Get one here](https://aistudio.google.com/apikey))
 - Microphone for audio recording
-
-### Installation
-
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/yourusername/web-records.git
-   cd web-records
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Start the development server:
-   ```bash
-   npm start
-   ```
-
-4. Open your browser to `http://localhost:8081`
 
 ### Configuration
 
@@ -52,177 +22,16 @@ A client-side web application for veterinary professionals to record consultatio
 
 ### Basic Workflow
 
-1. **Record**: Click "Start Recording" and speak your veterinary consultation notes
-2. **Stop**: Click "Stop Recording" when finished
-3. **Review Transcript**: Edit the AI-generated transcript if needed
-4. **Generate SOAP**: Click "Generate SOAP Note" to create a structured note
-5. **Copy**: Click "Copy as HTML" to copy the formatted note
-6. **Paste**: Paste the SOAP note into your EMR system
-
-### Tips for Best Results
-
-- Speak clearly and at a moderate pace
-- Use proper veterinary terminology
-- Mention all relevant details (patient info, symptoms, findings, plan)
-- Review and correct the transcript before generating SOAP notes
-- Edit the SOAP note as needed before copying
-
-## System Prompt
-
-The default system prompt instructs Gemini to format notes as:
-
-- **Subjective**: Patient history, owner concerns, symptoms reported
-- **Objective**: Physical exam findings, vital signs, observable data
-- **Assessment**: Diagnosis or differential diagnoses
-- **Plan**: Treatment plan, medications, follow-up instructions
-
-You can customize this prompt in Settings to match your clinic's format.
-
-## Development
-
-### Project Structure
-
-```
-web-records/
-├── js/
-│   ├── app.js                    # Main application controller
-│   ├── modules/
-│   │   ├── storage.js            # LocalStorage wrapper
-│   │   ├── audio-recorder.js     # Audio recording module
-│   │   └── gemini-client.js      # Gemini API client
-│   └── utils/
-│       ├── markdown-renderer.js  # Markdown to HTML conversion
-│       └── clipboard.js          # Clipboard utilities
-├── css/
-│   └── style.css                 # Application styles
-├── index.html                    # Main HTML page
-├── package.json                  # Dependencies
-└── webpack.config.*.js           # Webpack configuration
-```
-
-### Build for Production
-
-```bash
-npm run build
-```
-
-This creates a `dist/` folder with optimized files ready for deployment.
-
-## Deployment to GitHub Pages
-
-### Automatic Deployment (Recommended)
-
-This project includes GitHub Actions for automatic deployment. Simply:
-
-1. **Push to main branch:**
-   ```bash
-   git add .
-   git commit -m "Your commit message"
-   git push origin main
-   ```
-
-2. **Enable GitHub Pages in your repository:**
-   - Go to your repository on GitHub
-   - Navigate to **Settings** > **Pages**
-   - Under "Source", select **GitHub Actions**
-   - Save the settings
-
-3. **Monitor deployment:**
-   - Go to the **Actions** tab in your repository
-   - Watch the "Deploy to GitHub Pages" workflow run
-   - Once complete, your site will be live at `https://yourusername.github.io/web-records/`
-
-The GitHub Action will:
-- Automatically trigger on every push to `main`
-- Install dependencies
-- Build the production bundle
-- Deploy to GitHub Pages
-- Complete in ~2-3 minutes
-
-### Manual Deployment (Alternative)
-
-If you prefer manual deployment:
-
-1. Build the production version:
-   ```bash
-   npm run build
-   ```
-
-2. Deploy using gh-pages branch:
-   ```bash
-   git subtree push --prefix dist origin gh-pages
-   ```
-
-3. Configure GitHub Pages to use the `gh-pages` branch
+1. Record: Transcribes your spoken notes
+2. Review Transcript: Edit the AI-generated transcript if needed
+3. Generate SOAP: Choose a template and click 'Generate' to feed your transcript, the template, and the system prompt into the LLM.
+4. Copy: Click "Copy as HTML" to copy the full note to the clipboard to paste into WoofWare
 
 ## Privacy & Security
 
-- **No Server**: All processing happens in your browser
-- **Local Storage**: API keys and data are stored only in your browser
-- **BYOK Model**: You control your own API key
-- **No Tracking**: No analytics or data collection
-- **HIPAA Note**: This tool generates notes but doesn't store PHI
+- No Server: All processing happens in your browser
+- Local Storage: API keys and data are stored only in your browser
+- BYOK Model: You control your own API key
+- No Tracking: No analytics or data collection
 
 ⚠️ **Important**: API keys are stored in browser localStorage in plain text. Use on trusted devices only. Clear browser data when using shared computers.
-
-## Browser Compatibility
-
-- ✅ Chrome/Edge (Recommended)
-- ✅ Firefox
-- ⚠️ Safari (Limited testing)
-
-Requires:
-- MediaRecorder API
-- getUserMedia API
-- Clipboard API
-- LocalStorage
-
-## Cost Estimates
-
-Using Gemini 2.0 Flash:
-- ~$0.0003 per consultation (typical 5-minute recording)
-- Very low cost for 1-2 users
-
-Monitor your usage at [Google AI Studio](https://aistudio.google.com).
-
-## Troubleshooting
-
-### Microphone Access Denied
-- Check browser permissions for microphone access
-- Look for blocked permissions icon in address bar
-
-### Transcription Errors
-- Ensure good audio quality (minimize background noise)
-- Speak clearly and at moderate pace
-- Check API key is valid
-
-### API Key Invalid
-- Verify key is correct at [Google AI Studio](https://aistudio.google.com/apikey)
-- Ensure key has access to Gemini API
-- Check for any usage limits or restrictions
-
-### Copy to Clipboard Not Working
-- Some browsers require HTTPS for clipboard access
-- Use the fallback: select text manually and copy
-
-## Support
-
-For issues, questions, or feature requests, please open an issue on GitHub.
-
-## License
-
-MIT License - See LICENSE.txt for details
-
-## Version
-
-Current version: 0.1.0
-
-## Changelog
-
-### v0.1.0 (Initial Release)
-- Audio recording from browser microphone
-- Gemini-powered transcription
-- SOAP note generation with editable output
-- Copy to clipboard as HTML
-- LocalStorage persistence
-- Settings management

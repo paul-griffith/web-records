@@ -12,6 +12,7 @@ export interface Session {
   transcript?: string;
   soap?: string;
   soapHTML?: string;
+  systemPrompt?: string;
   state?: AppState;
   timestamp?: string;
 }
@@ -27,10 +28,6 @@ export enum AppState {
 
 export interface StorageKeys {
   API_KEY: string;
-  SYSTEM_PROMPT: string;
-  CURRENT_SESSION: string;
-  SESSION_HISTORY: string;
-  SELECTED_TEMPLATE: string;
 }
 
 export interface Template {

@@ -1,8 +1,4 @@
-/**
- * Main Application Component
- */
-
-import { useState, useEffect } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import { Header } from './Header';
 import { AlertContainer } from './AlertContainer';
 import { TranscriptSection } from './TranscriptSection';
@@ -13,8 +9,9 @@ import { GeminiClient } from '../modules/gemini-client';
 import { AudioRecorder } from '../modules/audio-recorder';
 import { renderMarkdown } from '../utils/markdown-renderer';
 import { copyHTMLToClipboard } from '../utils/clipboard';
-import { AppState, AlertType } from '../types';
-import { getTemplateById } from '../templates/templates';
+import { AlertType, AppState } from '../types';
+import { DEFAULT_PROMPT } from "../content/prompt";
+import { getTemplateById } from "../content/templates";
 
 export function App() {
   // Application state
@@ -23,6 +20,8 @@ export function App() {
   const [soapMarkdown, setSOAPMarkdown] = useState<string>('');
   const [soapHTML, setSOAPHTML] = useState<string>('');
   const [selectedTemplate, setSelectedTemplate] = useState<string>('none');
+  const [systemPrompt, setSystemPrompt] = useState<string>(DEFAULT_PROMPT);
+  const [templateBody, setTemplateBody] = useState<string>('');
 
   // UI state
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
@@ -45,38 +44,13 @@ export function App() {
       setIsSettingsOpen(true);
     }
 
-    // Load saved template selection
-    setSelectedTemplate(Storage.getSelectedTemplate());
-
-    // Attempt to recover session
-    const savedSession = Storage.getCurrentSession();
-    if (savedSession) {
-      if (savedSession.transcript) {
-        setTranscript(savedSession.transcript);
-        setAppState(AppState.TRANSCRIPT_READY);
-      }
-      if (savedSession.soap && savedSession.soapHTML) {
-        setSOAPMarkdown(savedSession.soap);
-        setSOAPHTML(savedSession.soapHTML);
-        setAppState(AppState.ANALYSIS_READY);
-      }
-    }
+    setSelectedTemplate('none');
   }, []);
 
-  // Auto-save current session
   useEffect(() => {
-    if (appState !== AppState.IDLE && appState !== AppState.RECORDING) {
-      Storage.setCurrentSession({
-        transcript,
-        soap: soapMarkdown,
-        soapHTML,
-        state: appState
-      });
-    }
-  }, [appState, transcript, soapMarkdown, soapHTML]);
+  }, [appState, transcript, soapMarkdown, soapHTML, systemPrompt, templateBody]);
 
-  // Alert helper
-  const showAlert = (message: string, type: AlertType = 'info') => {
+  function showAlert(message: string, type: AlertType = 'info') {
     setAlertMessage(message);
     setAlertType(type);
 
@@ -84,10 +58,9 @@ export function App() {
     setTimeout(() => {
       setAlertMessage(null);
     }, 5000);
-  };
+  }
 
-  // Recording handlers
-  const handleStartRecording = async (_getCursorPosition: () => number) => {
+  async function handleStartRecording(_getCursorPosition: () => number) {
     try {
       await audioRecorder.initialize();
       audioRecorder.start();
@@ -97,16 +70,19 @@ export function App() {
       const errorMsg = error instanceof Error ? error.message : 'Failed to start recording';
       showAlert(errorMsg, 'error');
     }
-  };
+  }
 
-  const handleStopRecording = async (getCursorPosition: () => number, setSelectionRange: (start: number, end: number) => void) => {
+  async function handleStopRecording(getCursorPosition: () => number,
+                                     setSelectionRange: (start: number, end: number) => void) {
     try {
       const audioData = await audioRecorder.stop();
       setAppState(AppState.TRANSCRIBING);
 
       // Transcribe audio
       if (!geminiClient) {
-        throw new Error('Gemini client not initialized');
+        showAlert('Gemini client not initialized', 'error');
+        setAppState(AppState.IDLE);
+        return;
       }
 
       const transcribedText = await geminiClient.transcribeAudio(
@@ -137,29 +113,22 @@ export function App() {
       showAlert(errorMsg, 'error');
       setAppState(AppState.IDLE);
     }
-  };
+  }
 
-  const handleGenerateNote = async () => {
+  async function handleGenerateNote() {
     try {
       setAppState(AppState.GENERATING);
 
       if (!geminiClient) {
-        throw new Error('Gemini client not initialized');
+        showAlert('Gemini client not initialized', 'error');
+        setAppState(AppState.TRANSCRIPT_READY);
+        return;
       }
-
-      const systemPrompt = Storage.getSystemPrompt();
-
-      // Get template content from current selection
-      const template = getTemplateById(selectedTemplate);
-      const templateContent = template?.content || '';
-
-      // Save the template selection to storage
-      Storage.setSelectedTemplate(selectedTemplate);
 
       const soapText = await geminiClient.generateNote(
         transcript,
         systemPrompt,
-        templateContent
+        templateBody
       );
 
       setSOAPMarkdown(soapText);
@@ -171,10 +140,9 @@ export function App() {
       showAlert(errorMsg, 'error');
       setAppState(AppState.TRANSCRIPT_READY);
     }
-  };
+  }
 
-  // SOAP handlers
-  const handleCopySOAP = async (html: string, text: string) => {
+  async function handleCopySOAP(html: string, text: string) {
     try {
       const success = await copyHTMLToClipboard(html, text);
       if (success) {
@@ -185,49 +153,37 @@ export function App() {
     } catch (error) {
       showAlert('Failed to copy to clipboard', 'error');
     }
-  };
+  }
 
-  const handleSaveSOAP = (html: string) => {
-    setSOAPHTML(html);
-
-    // Save to session history
-    Storage.addSessionToHistory({
-      transcript,
-      soap: soapMarkdown,
-      soapHTML: html,
-      state: appState,
-      timestamp: new Date().toISOString()
-    });
-
-    showAlert('Session saved to history', 'success');
-  };
-
-  // Settings handlers
-  const handleSettingsOpen = () => {
+  function handleSettingsOpen() {
     setIsSettingsOpen(true);
-  };
+  }
 
-  const handleSettingsClose = () => {
+  function handleSettingsClose() {
     setIsSettingsOpen(false);
-  };
+  }
 
-  const handleSettingsSave = (newApiKey: string, systemPrompt: string) => {
+  function handleSettingsSave(newApiKey: string) {
     Storage.setApiKey(newApiKey);
-    Storage.setSystemPrompt(systemPrompt);
 
     setGeminiClient(new GeminiClient(newApiKey));
 
     showAlert('Settings saved!', 'success');
-  };
+  }
 
-  const handleTestApiKey = async (testKey: string): Promise<boolean> => {
+  function handleTemplateChange(templateId: string) {
+    setSelectedTemplate(templateId);
+    setTemplateBody(getTemplateById(templateId)?.content ?? '');
+  }
+
+  async function handleTestApiKey(testKey: string): Promise<boolean> {
     try {
       const client = new GeminiClient(testKey);
       return await client.testApiKey();
     } catch (error) {
       return false;
     }
-  };
+  }
 
   return (
     <div className="app-container">
@@ -255,10 +211,17 @@ export function App() {
             appState={appState}
             soapHTML={soapHTML}
             selectedTemplate={selectedTemplate}
-            onTemplateChange={setSelectedTemplate}
+            systemPrompt={systemPrompt}
+            templateBody={templateBody}
+            onPromptChange={
+              (systemPrompt, templateBody) => {
+                setSystemPrompt(systemPrompt);
+                setTemplateBody(templateBody);
+              }
+            }
+            onTemplateChange={handleTemplateChange}
             onGenerateSOAP={handleGenerateNote}
             onCopy={handleCopySOAP}
-            onSave={handleSaveSOAP}
           />
         </div>
       </div>

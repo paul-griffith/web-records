@@ -6,19 +6,10 @@
 export class RichTextEditor {
   private editor: HTMLElement;
   private toolbar: HTMLElement;
-  private stats: HTMLElement | null;
-  private wordCountEl: HTMLElement | null = null;
-  private charCountEl: HTMLElement | null = null;
 
-  constructor(editorElement: HTMLElement, toolbarElement: HTMLElement, statsElement: HTMLElement | null = null) {
+  constructor(editorElement: HTMLElement, toolbarElement: HTMLElement) {
     this.editor = editorElement;
     this.toolbar = toolbarElement;
-    this.stats = statsElement;
-
-    if (this.stats) {
-      this.wordCountEl = this.stats.querySelector('#word-count');
-      this.charCountEl = this.stats.querySelector('#char-count');
-    }
 
     this.init();
   }
@@ -31,11 +22,6 @@ export class RichTextEditor {
 
     // Attach toolbar button handlers
     this.attachToolbarHandlers();
-
-    // Update stats on input
-    this.editor.addEventListener('input', () => {
-      this.updateStats();
-    });
 
     // Update toolbar button states on selection change
     document.addEventListener('selectionchange', () => {
@@ -53,9 +39,6 @@ export class RichTextEditor {
     this.editor.addEventListener('drop', (e) => {
       e.preventDefault();
     });
-
-    // Initial stats update
-    this.updateStats();
   }
 
   /**
@@ -189,21 +172,6 @@ export class RichTextEditor {
   }
 
   /**
-   * Update word and character count
-   */
-  private updateStats(): void {
-    if (!this.wordCountEl || !this.charCountEl) return;
-
-    const text = this.editor.innerText || '';
-    const words = text.trim().split(/\s+/).filter(w => w.length > 0);
-    const wordCount = text.trim().length > 0 ? words.length : 0;
-    const charCount = text.length;
-
-    this.wordCountEl.textContent = `${wordCount} word${wordCount !== 1 ? 's' : ''}`;
-    this.charCountEl.textContent = `${charCount} character${charCount !== 1 ? 's' : ''}`;
-  }
-
-  /**
    * Get clean HTML content
    */
   getHTML(): string {
@@ -215,7 +183,6 @@ export class RichTextEditor {
    */
   setHTML(html: string): void {
     this.editor.innerHTML = html;
-    this.updateStats();
   }
 
   /**
@@ -230,7 +197,6 @@ export class RichTextEditor {
    */
   clear(): void {
     this.editor.innerHTML = '';
-    this.updateStats();
   }
 
   /**

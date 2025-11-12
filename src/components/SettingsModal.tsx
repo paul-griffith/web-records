@@ -3,14 +3,14 @@
  */
 
 import { useState, useEffect } from 'preact/hooks';
-import type { JSX } from 'preact';
+import { TargetedEvent } from 'preact';
 import { Button } from './shared/Button';
 import { Storage } from '../modules/storage';
 
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (apiKey: string, systemPrompt: string) => void;
+  onSave: (apiKey: string) => void;
   onTestApiKey: (apiKey: string) => Promise<boolean>;
 }
 
@@ -21,14 +21,12 @@ export function SettingsModal({
   onTestApiKey
 }: SettingsModalProps) {
   const [apiKey, setApiKey] = useState<string>('');
-  const [systemPrompt, setSystemPrompt] = useState<string>('');
   const [testResult, setTestResult] = useState<string | null>(null);
 
   // Load settings when modal opens
   useEffect(() => {
     if (isOpen) {
       setApiKey(Storage.getApiKey());
-      setSystemPrompt(Storage.getSystemPrompt());
       setTestResult(null);
     }
   }, [isOpen]);
@@ -37,13 +35,9 @@ export function SettingsModal({
     return <div id="settings-modal" className="modal hidden"></div>;
   }
 
-  const handleApiKeyChange = (e: JSX.TargetedEvent<HTMLInputElement>) => {
+  const handleApiKeyChange = (e: TargetedEvent<HTMLInputElement>) => {
     setApiKey(e.currentTarget.value);
     setTestResult(null);
-  };
-
-  const handleSystemPromptChange = (e: JSX.TargetedEvent<HTMLTextAreaElement>) => {
-    setSystemPrompt(e.currentTarget.value);
   };
 
   const handleTestApiKey = async () => {
@@ -51,26 +45,8 @@ export function SettingsModal({
     setTestResult(isValid ? 'API key is valid!' : 'API key test failed');
   };
 
-  const handleResetPrompt = () => {
-    setSystemPrompt(Storage.getDefaultSystemPrompt());
-  };
-
-  const handleClearSession = () => {
-    if (confirm('Clear the current session? This cannot be undone.')) {
-      Storage.clearCurrentSession();
-      window.location.reload();
-    }
-  };
-
-  const handleClearAll = () => {
-    if (confirm('Clear ALL data including API key and settings? This cannot be undone.')) {
-      Storage.clearAllData();
-      window.location.reload();
-    }
-  };
-
   const handleSave = () => {
-    onSave(apiKey, systemPrompt);
+    onSave(apiKey);
     onClose();
   };
 
@@ -120,42 +96,6 @@ export function SettingsModal({
                 Google AI Studio
               </a>
             </p>
-          </div>
-
-          {/* System Prompt */}
-          <div className="form-group">
-            <label htmlFor="system-prompt-input">System Prompt for SOAP Generation</label>
-            <textarea
-              id="system-prompt-input"
-              className="input-field"
-              rows={8}
-              value={systemPrompt}
-              onInput={handleSystemPromptChange}
-            />
-            <Button
-              className="btn btn-small"
-              onClick={handleResetPrompt}
-            >
-              Reset to Default
-            </Button>
-          </div>
-
-          {/* Data Management */}
-          <div className="form-group">
-            <label>Data Management</label>
-            <Button
-              className="btn btn-danger btn-small"
-              onClick={handleClearSession}
-            >
-              Clear Current Session
-            </Button>
-            {' '}
-            <Button
-              className="btn btn-danger btn-small"
-              onClick={handleClearAll}
-            >
-              Clear All Data
-            </Button>
           </div>
         </div>
 

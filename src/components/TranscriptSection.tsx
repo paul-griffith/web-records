@@ -1,9 +1,5 @@
-/**
- * Transcript review section component
- */
-
 import { useRef, useState } from 'preact/hooks';
-import type { JSX } from 'preact';
+import { TargetedEvent } from 'preact';
 import { Button } from './shared/Button';
 import { Loading } from './shared/Loading';
 import { AppState } from '../types';
@@ -38,7 +34,7 @@ export function TranscriptSection({
     textareaRef.current?.focus();
   };
 
-  const handleTextAreaChange = (e: JSX.TargetedEvent<HTMLTextAreaElement>) => {
+  const handleTextAreaChange = (e: TargetedEvent<HTMLTextAreaElement>) => {
     onTranscriptChange(e.currentTarget.value);
   };
 
@@ -69,11 +65,25 @@ export function TranscriptSection({
 
   return (
     <div className="transcript-section">
+      <div className="transcript-content">
+        <textarea
+          ref={textareaRef}
+          id="transcript-text"
+          className="transcript-editor"
+          placeholder="Click 'Start Recording' to begin transcription..."
+          value={transcript}
+          onInput={handleTextAreaChange}
+        />
+      </div>
+
+      {isTranscribing && (
+        <Loading message="Transcribing audio..." />
+      )}
+
       <div className="section-header">
-        <h2>Transcript</h2>
         {!isRecording ? (
           <Button
-            className="btn btn-primary btn-small"
+            className="btn btn-primary"
             onClick={handleStartRecording}
             disabled={isTranscribing}
           >
@@ -86,7 +96,7 @@ export function TranscriptSection({
               <span className="recording-timer">{formatTime(recordingTime)}</span>
             </div>
             <Button
-              className="btn btn-danger btn-small"
+              className="btn btn-danger"
               onClick={handleStopRecording}
             >
               Stop Recording
@@ -94,23 +104,6 @@ export function TranscriptSection({
           </div>
         )}
       </div>
-
-      {isTranscribing && (
-        <Loading message="Transcribing audio..." />
-      )}
-
-      {!isTranscribing && (
-        <div className="transcript-content">
-          <textarea
-            ref={textareaRef}
-            id="transcript-text"
-            className="transcript-editor"
-            placeholder="Click 'Start Recording' to begin transcription..."
-            value={transcript}
-            onInput={handleTextAreaChange}
-          />
-        </div>
-      )}
     </div>
   );
 }

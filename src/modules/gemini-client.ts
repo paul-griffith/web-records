@@ -1,6 +1,6 @@
-import {GoogleGenAI} from '@google/genai';
+import { GoogleGenAI } from '@google/genai';
 
-import {abbreviations} from "../templates/abbreviations";
+import { abbreviations } from "../content/abbreviations";
 
 const transcriptionModel = 'gemini-2.5-flash';
 const analysisModel = 'gemini-2.5-pro';
@@ -133,10 +133,9 @@ export class GeminiClient {
 
       // Add template if provided
       if (templateContent && templateContent.trim().length > 0) {
-        userParts.unshift(
-          {text: "Use the following template as a guide for structuring the note:"},
+        userParts.push(
+          {text: "Use the below template to structure the output, but only use content from the user's transcription"},
           {text: templateContent},
-          {text: "\n---\n"}
         );
       }
 
