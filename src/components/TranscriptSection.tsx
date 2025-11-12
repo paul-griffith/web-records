@@ -70,6 +70,7 @@ export function TranscriptSection({
           ref={textareaRef}
           id="transcript-text"
           className="transcript-editor"
+          rows={6}
           placeholder="Click 'Start Recording' to begin transcription..."
           value={transcript}
           onInput={handleTextAreaChange}

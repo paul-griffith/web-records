@@ -65,7 +65,6 @@ export function App() {
       await audioRecorder.initialize();
       audioRecorder.start();
       setAppState(AppState.RECORDING);
-      showAlert('Recording started', 'success');
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Failed to start recording';
       showAlert(errorMsg, 'error');
@@ -98,7 +97,6 @@ export function App() {
 
       setTranscript(newTranscript);
       setAppState(AppState.TRANSCRIPT_READY);
-      showAlert('Transcription inserted!', 'success');
 
       // Set cursor after inserted text
       const newCursorPos = cursorPos + transcribedText.length;

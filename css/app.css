@@ -382,7 +382,7 @@ body {
 
 /* Empty state placeholder */
 .soap-editor:empty:before {
-  content: 'SOAP note will appear here...';
+  content: 'Note will appear here...';
   color: var(--color-text-light);
   font-style: italic;
 }
