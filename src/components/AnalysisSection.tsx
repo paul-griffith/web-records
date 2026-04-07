@@ -117,54 +117,6 @@ export function AnalysisSection({
           {hasContent ? 'Regenerate' : 'Generate'}
         </Button>
 
-        {/* Formatting Toolbar */}
-        <div id="soap-toolbar" className="editor-toolbar" ref={toolbarRef}>
-          <div className="toolbar-group">
-            <button type="button" className="toolbar-btn" data-command="bold" title="Bold (Ctrl+B)">
-              <strong>B</strong>
-            </button>
-            <button type="button" className="toolbar-btn" data-command="italic" title="Italic (Ctrl+I)">
-              <em>I</em>
-            </button>
-            <button type="button" className="toolbar-btn" data-command="underline" title="Underline (Ctrl+U)">
-              <u>U</u>
-            </button>
-          </div>
-          <div className="toolbar-separator"></div>
-          <div className="toolbar-group">
-            <button type="button" className="toolbar-btn" data-command="insertUnorderedList" title="Bullet List">
-              • List
-            </button>
-            <button type="button" className="toolbar-btn" data-command="insertOrderedList" title="Numbered List">
-              1. List
-            </button>
-          </div>
-          <div className="toolbar-separator"></div>
-          <div className="toolbar-group">
-            <button type="button" className="toolbar-btn" data-command="formatBlock" data-value="h2" title="Heading">
-              H
-            </button>
-            <button type="button" className="toolbar-btn" data-command="formatBlock" data-value="p" title="Paragraph">
-              P
-            </button>
-          </div>
-          <div className="toolbar-separator"></div>
-          <div className="toolbar-group">
-            <button type="button" className="toolbar-btn" data-command="undo" title="Undo (Ctrl+Z)">
-              ↶
-            </button>
-            <button type="button" className="toolbar-btn" data-command="redo" title="Redo (Ctrl+Y)">
-              ↷
-            </button>
-          </div>
-          <div className="toolbar-separator"></div>
-          <div className="toolbar-group">
-            <button type="button" id="clean-formatting-btn" className="toolbar-btn" title="Clean Formatting">
-              Clear Format
-            </button>
-          </div>
-        </div>
-
         {/* Editor */}
         <div
           id="soap-editor"
@@ -173,8 +125,33 @@ export function AnalysisSection({
           ref={editorRef}
         ></div>
 
-        {/* Fixed footer with action buttons */}
+        {/* Footer with toolbar and copy button */}
         <div className="soap-footer">
+          <div id="soap-toolbar" className="editor-toolbar" ref={toolbarRef}>
+            <div className="toolbar-group">
+              <button type="button" className="toolbar-btn" data-command="insertUnorderedList" title="Bullet List">
+                • List
+              </button>
+              <button type="button" className="toolbar-btn" data-command="insertOrderedList" title="Numbered List">
+                1. List
+              </button>
+            </div>
+            <div className="toolbar-separator"></div>
+            <div className="toolbar-group">
+              <button type="button" className="toolbar-btn" data-command="formatBlock" data-value="h2" title="Heading">
+                H
+              </button>
+              <button type="button" className="toolbar-btn" data-command="formatBlock" data-value="p" title="Paragraph">
+                P
+              </button>
+            </div>
+            <div className="toolbar-separator"></div>
+            <div className="toolbar-group">
+              <button type="button" id="clean-formatting-btn" className="toolbar-btn" title="Clean Formatting">
+                Clear Format
+              </button>
+            </div>
+          </div>
           <Button
             className="btn btn-primary"
             onClick={handleCopy}

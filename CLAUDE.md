@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Veterinary Analaysis Generator - A client-side web application using TypeScript, Preact, and Google Gemini AI for recording veterinary consultations, transcribing audio, and generating structured responses.
+Veterinary Record Assistant - A client-side web application using TypeScript, Preact, and Google Gemini AI for recording veterinary consultations, transcribing audio, and generating structured notes. Templates are general-purpose and cover SOAP notes, intake histories, inpatient plans, wellness exams, and more.
 
 ## Development Commands
 
@@ -41,11 +41,13 @@ Core business logic modules:
 - `gemini-client.ts` - Gemini API client with methods for transcription and SOAP generation
 - `storage.ts` - LocalStorage abstraction for API keys, prompts, session data, template selection
 
-**2a. Template System (`src/templates/`)**
-- `templates.ts` - Predefined SOAP note templates (wellness exams, sick visits, dental, surgery, rechecks, clinic-specific formats)
-- Templates provide structured formats and example sections for different visit types
-- Selected template content is passed to Gemini during SOAP generation as additional context
-- Templates are embedded in source code (not user-editable) but can be extended by developers
+**2a. Content Layer (`src/content/`)**
+- `templates.ts` - Template definitions; each template bundles a `systemPrompt` (AI behavior) and `content` (output structure/skeleton)
+- `abbreviations.ts` - Clinic-specific abbreviation map passed to both transcription and generation prompts
+- `prompt.ts` - `DEFAULT_PROMPT` fallback used when no template is selected
+- `transcription-prompt.ts` - System instruction for audio transcription (extracted for easy editing)
+- Templates are embedded in source code (not user-editable at runtime) but straightforward to extend
+- Template selection persists across page reloads via localStorage
 
 **3. Two-Column Layout**
 - Fixed two-column grid layout (50/50 split) optimized for laptop screens
@@ -68,13 +70,12 @@ State is managed in `App.tsx` and propagated to child components via props.
 - Cursor position tracked via textarea ref and callbacks
 
 **6. Session Persistence**
-- Current session auto-saves to localStorage as user progresses
-- Session history keeps last 50 completed sessions
-- Recovery on page reload via `Storage.getCurrentSession()`
+- Template selection persists to localStorage and is restored on page reload (including its system prompt and structure)
+- Transcript and generated note are session-only (not persisted)
 
 **7. Model Configuration**
-- Separate model selection for transcription (default: gemini-2.5-flash) and SOAP generation (default: gemini-2.5-pro)
-- Configurable system prompts stored in localStorage
+- Transcription model: `gemini-2.5-flash` (defined in `gemini-client.ts`)
+- Note generation model: `gemini-2.5-pro` (defined in `gemini-client.ts`)
 - API key stored in localStorage (client-side only, no backend)
 
 ### Module Responsibilities
@@ -97,16 +98,12 @@ State is managed in `App.tsx` and propagated to child components via props.
 **Storage (`src/modules/storage.ts`)**
 - Single source of truth for localStorage keys
 - Manages:
-  - API key persistence
-  - System prompt (with default template)
-  - Template selection (by ID) - selected in AnalysisSection, stored for persistence
-  - Current session (for recovery)
-  - Session history (up to 50 entries)
+  - `gemini_api_key` - API key persistence
+  - `selected_template` - Template ID, restored on page load
 
-**Abbreviations (`src/modules/abbreviations.ts`)**
+**Abbreviations (`src/content/abbreviations.ts`)**
 - Map of veterinary and clinic-specific abbreviations
-- Used in both transcription and note generation prompts
-- Helps AI understand domain-specific terminology
+- Injected into both the transcription prompt and note generation prompt
 - Examples: "LBVC", "C/S/V/D", "NPO", "AUS"
 
 ### Build Configuration
@@ -125,30 +122,29 @@ State is managed in `App.tsx` and propagated to child components via props.
 
 Central types defined in `src/types/index.ts`:
 - `AppState` enum - Workflow state machine
-- `Session` - Transcript + SOAP data structure
+- `Session` - Transcript + note data structure
 - `AudioData` - Audio blob with metadata
-- `StorageKeys` - LocalStorage key definitions
-- `SOAPTemplate` - Template structure (id, name, description, content)
+- `StorageKeys` - LocalStorage key definitions (`API_KEY`, `SELECTED_TEMPLATE`)
+- `Template` - Template structure (`name`, `systemPrompt`, `content`)
 - `AlertType` - UI notification types
 
 ## Important Implementation Notes
 
 ### Gemini API Usage
-- Uses `@google/genai` v0.3.1+ (newer SDK as of recent migration)
+- Uses `@google/genai` v0.3.1+
 - API structure: `genAI.models.generateContent()` with `config.systemInstruction`
-- Both transcription and SOAP generation use same API pattern but different models
-- Transcription prompt includes veterinary terminology guidance and formatting rules
-- SOAP generation optionally includes template content as context before the transcript
-- Commented-out `thinkingConfig` in SOAP generation (line 150-152) - experimental feature
+- Transcription model: `gemini-2.5-flash`; note generation model: `gemini-2.5-pro`
+- Transcription prompt lives in `src/content/transcription-prompt.ts`
+- Note generation uses the template's `systemPrompt` as `systemInstruction`, with transcript and optional template `content` as user message parts
 
 ### Template System Implementation
-- Templates defined as array in `src/templates/templates.ts`
-- Each template has: unique ID, display name, description, markdown content
-- Template selection stored in localStorage via `Storage.getSelectedTemplate()`
-- Flow: User selects template in AnalysisSection → ID stored → Template content retrieved during note generation → Content prepended to user prompt
-- Template content guides structure but doesn't force exact format (AI interprets)
-- Default "No Template" option (id: 'none') bypasses template injection
-- Built-in templates: No Template, Inpatient Assessment, Inpatient Plan, Canine/Feline Wellness, Kitten Plan
+- Templates defined in `src/content/templates.ts` as a `Map<string, Template>`
+- Each template has: `name` (display), `systemPrompt` (AI behavior), `content` (output skeleton)
+- **Selecting a template sets both the system prompt and the structure textarea** — this is the primary way to switch between note types (SOAP, intake history, wellness, etc.)
+- Flow: user selects template → `handleTemplateChange` in `App.tsx` sets `systemPrompt`, `templateBody`, and persists ID to localStorage → on next load, template is restored from `Storage.getSelectedTemplate()`
+- System prompt remains editable in the UI for per-session tweaks after template selection
+- Template `content` is passed to `generateNote()` as an additional user message part; empty content (id: `'none'`) skips injection
+- Built-in templates: No Template, SOAP Note, Intake/History, Inpatient Assessment, Inpatient Plan, Canine Wellness, Feline Wellness, Kitten Plan
 
 ### Audio Handling
 - Supports WebM, MP3, WAV, OGG (in order of preference)
@@ -158,21 +154,7 @@ Central types defined in `src/types/index.ts`:
 ### LocalStorage Schema
 Keys managed by Storage module:
 - `gemini_api_key` - User's API key (plain text)
-- `system_prompt` - Note generation instructions
-- `selected_template` - Template ID (defaults to 'none')
-- `current_session` - Auto-save for recovery
-- `session_history` - Array of completed sessions
-
-Session object structure:
-```typescript
-{
-  transcript?: string;
-  soap?: string;          // Markdown version
-  soapHTML?: string;      // HTML version
-  state?: AppState;
-  timestamp?: string;
-}
-```
+- `selected_template` - Template ID (defaults to `'none'`)
 
 ### Privacy & Security Model
 - All processing client-side (no backend server)
@@ -194,17 +176,19 @@ Session object structure:
 3. Update component conditional rendering based on appState
 
 ### Adding or Modifying Templates
-1. Edit `src/templates/templates.ts`
-2. Add new object to `SOAP_TEMPLATES` array with unique ID
-3. Include: id, name (display text), description (help text), content (markdown format)
-4. Template content should show example structure, not rigid requirements
-5. Consider clinic-specific abbreviations and formatting conventions
+1. Edit `src/content/templates.ts`
+2. Add a new entry to the `TEMPLATES` map with a unique string key
+3. Include:
+   - `name` - display text in the dropdown
+   - `systemPrompt` - the AI behavior instruction for this note type
+   - `content` - Markdown skeleton shown in the template editor (can be empty)
+4. Template content guides structure but doesn't force exact format (AI interprets)
+5. Consider clinic-specific abbreviations from `src/content/abbreviations.ts`
 
 ### Changing Gemini Prompts
-Default prompts are in `src/modules/`:
-- Transcription: Hardcoded in `gemini-client.ts` (~line 62-66)
-- Note generation: `storage.ts` DEFAULT_SYSTEM_PROMPT (~line 18-26)
-- Templates: Separate from system prompt, defined in `src/templates/templates.ts`
+- **Transcription prompt**: `src/content/transcription-prompt.ts` — edit `TRANSCRIPTION_PROMPT`
+- **Per-template system prompts**: `src/content/templates.ts` — edit each template's `systemPrompt` field
+- **Default system prompt** (no template): `src/content/prompt.ts` — edit `DEFAULT_PROMPT`
 
 ### Component Communication Patterns
 **Cursor Position Tracking** (TranscriptSection → App):
@@ -261,14 +245,6 @@ git subtree push --prefix dist origin gh-pages
 
 ## Obsolete Files (Safe to Delete)
 
-These files exist but are no longer used in the current implementation:
 - `src/components/RecordingSection.tsx` - Recording functionality moved to TranscriptSection
 - `dist/src/components/RecordingSection.d.ts` - Build artifact from old component
 - `dist/src/components/SOAPSection.d.ts` - Build artifact from renamed component (now AnalysisSection)
-
-See `CLEANUP_PLAN.md` for detailed removal instructions.
-
-## Related Documentation
-
-- `CURRENT_STATE.md` - Comprehensive snapshot of current application architecture, data flows, and implementation details
-- `CLEANUP_PLAN.md` - Detailed plan for removing obsolete files and cruft from previous implementations

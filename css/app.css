@@ -275,27 +275,25 @@ body {
 
 .toolbar-btn {
   padding: var(--spacing-xs) var(--spacing-sm);
-  border: 1px solid var(--color-border);
+  border: none;
   border-radius: 4px;
-  background-color: var(--color-surface);
+  background-color: transparent;
   cursor: pointer;
   font-family: var(--font-family);
   font-size: 0.875rem;
   color: var(--color-text);
-  transition: background-color 0.2s, border-color 0.2s;
+  transition: background-color 0.2s;
   white-space: nowrap;
 }
 
 .toolbar-btn:hover {
   background-color: var(--color-bg);
-  border-color: var(--color-primary);
 }
 
 .toolbar-btn:active,
 .toolbar-btn.active {
   background-color: var(--color-primary);
   color: white;
-  border-color: var(--color-primary);
 }
 
 .toolbar-separator {
@@ -911,11 +909,8 @@ body {
   flex-shrink: 0;
   display: flex;
   gap: var(--spacing-xs);
-  padding: var(--spacing-sm);
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius) var(--border-radius) 0 0;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .soap-editor {
@@ -923,7 +918,7 @@ body {
   overflow-y: auto;
   padding: var(--spacing-md);
   border: 1px solid var(--color-border);
-  border-top: none;
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
   background: white;
   font-family: var(--font-family);
   font-size: 0.95rem;
@@ -947,7 +942,13 @@ body {
   flex-shrink: 0;
   display: flex;
   gap: var(--spacing-md);
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-top: none;
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
 }
 
 /* Override legacy card styles that conflict with new layout */

@@ -8,15 +8,6 @@ export interface AudioData {
   duration: number;
 }
 
-export interface Session {
-  transcript?: string;
-  soap?: string;
-  soapHTML?: string;
-  systemPrompt?: string;
-  state?: AppState;
-  timestamp?: string;
-}
-
 export enum AppState {
   IDLE = 'idle',
   RECORDING = 'recording',
@@ -28,10 +19,12 @@ export enum AppState {
 
 export interface StorageKeys {
   API_KEY: string;
+  SELECTED_TEMPLATE: string;
 }
 
 export interface Template {
   name: string;
+  systemPrompt: string;
   content: string;
 }
 

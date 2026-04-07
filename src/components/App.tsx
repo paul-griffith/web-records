@@ -17,7 +17,6 @@ export function App() {
   // Application state
   const [appState, setAppState] = useState<AppState>(AppState.IDLE);
   const [transcript, setTranscript] = useState<string>('');
-  const [soapMarkdown, setSOAPMarkdown] = useState<string>('');
   const [soapHTML, setSOAPHTML] = useState<string>('');
   const [selectedTemplate, setSelectedTemplate] = useState<string>('none');
   const [systemPrompt, setSystemPrompt] = useState<string>(DEFAULT_PROMPT);
@@ -34,9 +33,7 @@ export function App() {
 
   // Initialize on mount
   useEffect(() => {
-    // Load API key and initialize client
     const key = Storage.getApiKey();
-
     if (key) {
       setGeminiClient(new GeminiClient(key));
     } else {
@@ -44,11 +41,13 @@ export function App() {
       setIsSettingsOpen(true);
     }
 
-    setSelectedTemplate('none');
+    // Restore saved template selection
+    const savedTemplateId = Storage.getSelectedTemplate();
+    const savedTemplate = getTemplateById(savedTemplateId);
+    setSelectedTemplate(savedTemplateId);
+    setTemplateBody(savedTemplate?.content ?? '');
+    setSystemPrompt(savedTemplate?.systemPrompt ?? DEFAULT_PROMPT);
   }, []);
-
-  useEffect(() => {
-  }, [appState, transcript, soapMarkdown, soapHTML, systemPrompt, templateBody]);
 
   function showAlert(message: string, type: AlertType = 'info') {
     setAlertMessage(message);
@@ -129,7 +128,6 @@ export function App() {
         templateBody
       );
 
-      setSOAPMarkdown(soapText);
       const html = renderMarkdown(soapText);
       setSOAPHTML(html);
       setAppState(AppState.ANALYSIS_READY);
@@ -153,14 +151,6 @@ export function App() {
     }
   }
 
-  function handleSettingsOpen() {
-    setIsSettingsOpen(true);
-  }
-
-  function handleSettingsClose() {
-    setIsSettingsOpen(false);
-  }
-
   function handleSettingsSave(newApiKey: string) {
     Storage.setApiKey(newApiKey);
 
@@ -170,8 +160,11 @@ export function App() {
   }
 
   function handleTemplateChange(templateId: string) {
+    const template = getTemplateById(templateId);
     setSelectedTemplate(templateId);
-    setTemplateBody(getTemplateById(templateId)?.content ?? '');
+    setTemplateBody(template?.content ?? '');
+    setSystemPrompt(template?.systemPrompt ?? DEFAULT_PROMPT);
+    Storage.setSelectedTemplate(templateId);
   }
 
   async function handleTestApiKey(testKey: string): Promise<boolean> {
@@ -185,7 +178,9 @@ export function App() {
 
   return (
     <div className="app-container">
-      <Header onSettingsClick={handleSettingsOpen} />
+      <Header onSettingsClick={() => {
+        setIsSettingsOpen(true);
+      }}/>
 
       <AlertContainer
         message={alertMessage}
@@ -226,7 +221,9 @@ export function App() {
 
       <SettingsModal
         isOpen={isSettingsOpen}
-        onClose={handleSettingsClose}
+        onClose={() => {
+          setIsSettingsOpen(false);
+        }}
         onSave={handleSettingsSave}
         onTestApiKey={handleTestApiKey}
       />

@@ -1,6 +1,7 @@
 import { GoogleGenAI } from '@google/genai';
 
 import { abbreviations } from "../content/abbreviations";
+import { TRANSCRIPTION_PROMPT } from "../content/transcription-prompt";
 
 const transcriptionModel = 'gemini-2.5-flash';
 const analysisModel = 'gemini-2.5-pro';
@@ -57,14 +58,6 @@ export class GeminiClient {
       const base64Audio = await this.blobToBase64(audioBlob);
       const geminiMimeType = this.getGeminiMimeType(mimeType);
 
-      // Prepare the prompt and audio data
-      const prompt = `Transcribe this veterinary consultation audio into text.
-        Include all spoken content accurately, preserving medical terminology.
-        Format as plain text without adding any commentary or notes.
-        Spoken punctuation or formatting guidelines (such as "enter" or "period") should be interpreted before output, not returned verbatim.
-        Common abbreviations include ${Array.from(abbreviations.entries()).map(([key, value]) => `${key}: ${value}`).join(', ')}`;
-
-      // Generate transcription using new API
       const response = await this.genAI.models.generateContent({
         model: transcriptionModel,
         contents: [
@@ -81,7 +74,7 @@ export class GeminiClient {
           }
         ],
         config: {
-          systemInstruction: prompt,
+          systemInstruction: TRANSCRIPTION_PROMPT,
         },
       });
 

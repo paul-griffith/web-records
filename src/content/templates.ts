@@ -1,12 +1,22 @@
 import {Template} from '../types';
 
 export const TEMPLATES: Map<string, Template> = new Map([
-  ['none', {name: 'No Template', content: ''}],
-  ['SOAP',
-    {
-      name: 'SOAP Template',
-      content: `
-## Subjective:
+  ['none', {
+    name: 'No Template',
+    systemPrompt: `You are a veterinary medical assistant.
+Convert the user's spoken transcript into a clear, structured note.
+Format your response in clean Markdown with clear section headers.
+Be concise but thorough. Use professional veterinary terminology.`,
+    content: '',
+  }],
+
+  ['SOAP', {
+    name: 'SOAP Note',
+    systemPrompt: `You are a veterinary medical assistant.
+Generate a SOAP note from the transcript using standard veterinary terminology.
+Format your response in clean Markdown. Be concise but thorough.
+Only include content from the transcript — do not invent clinical details.`,
+    content: `## Subjective:
 
 * Patient history, owner concerns, symptoms reported
 
@@ -21,13 +31,36 @@ export const TEMPLATES: Map<string, Template> = new Map([
 ## Plan:
 
 * Treatment plan, medications, follow-up instructions
-`
-    }],
-  ['inpatient-assessment',
-    {
-      name: 'Inpatient Assessment',
-      content: `
-## CURRENT TREATMENTS:
+`,
+  }],
+
+  ['intake-history', {
+    name: 'Intake / History',
+    systemPrompt: `You are a veterinary medical assistant.
+Summarize the patient's intake history and presenting complaint from the spoken transcript.
+Focus on owner-reported history, timeline of symptoms, and key concerns.
+Format your response in clean Markdown. Be concise but complete.
+Only include content from the transcript — do not invent clinical details.`,
+    content: `## Patient Information
+
+## Presenting Complaint
+
+## History & Timeline
+
+## Owner Concerns / Questions
+
+## Additional Notes
+`,
+  }],
+
+  ['inpatient-assessment', {
+    name: 'Inpatient Assessment',
+    systemPrompt: `You are a veterinary medical assistant.
+Generate an inpatient assessment note from the transcript.
+Include current treatments, diagnostics, problem list, and owner communication as discussed.
+Format your response in clean Markdown. Use the provided template structure.
+Only include content from the transcript — do not invent clinical details.`,
+    content: `## CURRENT TREATMENTS:
 
 1. Fluids
 2. Nutrition: RER = ____kcal/d, feeding RC GI LF liquid (0.9kcal/mL) or RC Recovery (0.9kcal/mL) or RC renal liquid (1.3 kcal/mL dog, 0.9kcal/mL cat)
@@ -57,13 +90,17 @@ export const TEMPLATES: Map<string, Template> = new Map([
 
 1.
 AM ASSESSMENT / OWNER COMMUNICATION:
-TTO ([ClientFirstName], phone) @ ___ : ___
-`.trim(),
-    }],
+TTO ([ClientFirstName], phone) @ ___ : ___`,
+  }],
+
   ['inpatient-plan', {
     name: 'Inpatient Plan',
-    content: `
-## Monitoring:
+    systemPrompt: `You are a veterinary medical assistant.
+Generate an inpatient monitoring and treatment plan from the transcript.
+Include AM and PM adjustment notes as discussed.
+Format your response in clean Markdown. Be concise.
+Only include content from the transcript — do not invent clinical details.`,
+    content: `## Monitoring:
 
 * See Instinct monitoring sheet
 
@@ -73,13 +110,17 @@ TTO ([ClientFirstName], phone) @ ___ : ___
 
 ## PM changes/assessment/update:
 
-* Adjust IVF, pain meds, nutrition, labs?
-`.trim(),
+* Adjust IVF, pain meds, nutrition, labs?`,
   }],
+
   ['canine-wellness', {
     name: 'Canine Wellness Exam',
-    content: `
-## Client Communication:
+    systemPrompt: `You are a veterinary medical assistant.
+Generate a canine wellness exam note from the transcript.
+Cover client communication, diagnostics, in-hospital treatments, vaccines administered, and medications.
+Format your response in clean Markdown. Be concise but complete.
+Only include content from the transcript — do not invent clinical details.`,
+    content: `## Client Communication:
 
 Discussed vaccine schedule and vaccine reactions.
 Recommended monthly flea/tick/heartworm
@@ -103,13 +144,17 @@ Recommend screening labwork.
 ## Medications:
 
 OK to refill preventative products with annual exam.
-
-`.trim()
+`,
   }],
+
   ['feline-wellness', {
     name: 'Feline Wellness Exam',
-    content: `
-## Client Communication:
+    systemPrompt: `You are a veterinary medical assistant.
+Generate a feline wellness exam note from the transcript.
+Cover client communication, diagnostics, in-hospital treatments, vaccines administered, and medications.
+Format your response in clean Markdown. Be concise but complete.
+Only include content from the transcript — do not invent clinical details.`,
+    content: `## Client Communication:
 
 * Discussed vaccine schedule and vaccine reactions.
 * Recommended monthly flea/tick/heartworm
@@ -129,17 +174,21 @@ OK to refill preventative products with annual exam.
 ## Medications:
 
 OK to refill preventative products with annual exam.
-
-`.trim(),
+`,
   }],
+
   ['kitten-plan', {
-    name: "Kitten Plan",
-    content: `
-## Discussed kitten care with O:
+    name: 'Kitten Plan',
+    systemPrompt: `You are a veterinary medical assistant.
+Generate a kitten wellness plan note from the transcript.
+Include all education topics discussed with the owner, diagnostics, vaccines, and medications.
+Format your response in clean Markdown. Be concise but complete.
+Only include content from the transcript — do not invent clinical details.`,
+    content: `## Discussed kitten care with O:
 
 * Vaccine schedule - Core (FVRCP, Rabies) vs. non-core (FeLV in cats >1 yr)
 * Vaccine reactions - Normal (e.g. mild lethargy, injection site inflammation) vs. emergency (e.g. vomiting, diarrhea, facial/generalized pruritus, increased respiratory rate/effort, collapse)
-* Discussed injection site sarcoma - “1-2-3 rule” (Increasing in site >1 month after vaccination, >2cm in diameter, remains present > 3 months after vaccination); Occur at a rate of about 1 per 10,000 - 30,000 vaccinations
+* Discussed injection site sarcoma - "1-2-3 rule" (Increasing in site >1 month after vaccination, >2cm in diameter, remains present > 3 months after vaccination); Occur at a rate of about 1 per 10,000 - 30,000 vaccinations
 * Patient not protected from infectious disease - Recommended avoiding other kittens or high risk areas until 1-2 weeks after last vaccination
 * Retroviral testing - Recommended testing prior to FeLV vaccination
 * Intestinal parasites - Recommended Fecal OP+G and deworming (4 total; 2 weeks apart)
@@ -165,9 +214,8 @@ OK to refill preventative products with annual exam.
 ## Medications:
 
 OK to refill preventative products with annual exam.
-
-`.trim(),
-  }]
+`,
+  }],
 ]);
 
 export function getTemplateById(id: string): Template | undefined {

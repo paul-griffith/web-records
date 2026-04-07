@@ -4,8 +4,8 @@
  */
 
 export class RichTextEditor {
-  private editor: HTMLElement;
-  private toolbar: HTMLElement;
+  private readonly editor: HTMLElement;
+  private readonly toolbar: HTMLElement;
 
   constructor(editorElement: HTMLElement, toolbarElement: HTMLElement) {
     this.editor = editorElement;
