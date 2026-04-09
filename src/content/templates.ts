@@ -1,4 +1,4 @@
-import {Template} from '../types';
+import { Template } from '../types';
 
 export const TEMPLATES: Map<string, Template> = new Map([
   ['none', {
@@ -39,18 +39,16 @@ Only include content from the transcript — do not invent clinical details.`,
     systemPrompt: `You are a veterinary medical assistant.
 Summarize the patient's intake history and presenting complaint from the spoken transcript.
 Focus on owner-reported history, timeline of symptoms, and key concerns.
-Format your response in clean Markdown. Be concise but complete.
+Be concise but complete. Respond in paragraph form, with no formatting/section headers - only newlines between sections.
 Only include content from the transcript — do not invent clinical details.`,
-    content: `## Patient Information
-
-## Presenting Complaint
-
-## History & Timeline
-
-## Owner Concerns / Questions
-
-## Additional Notes
-`,
+    content: `
+    Presented for XXX
+    Appetite - XXX
+    Energy - XXX
+    No PU/PD
+    No C/S/V/D
+    Diet - XXX
+    Medications - XXX`,
   }],
 
   ['inpatient-assessment', {
