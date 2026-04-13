@@ -127,7 +127,6 @@ export class GeminiClient {
       // Add template if provided
       if (templateContent && templateContent.trim().length > 0) {
         userParts.push(
-          {text: "Use the below template to structure the output, but only use content from the user's transcription"},
           {text: templateContent},
         );
       }
