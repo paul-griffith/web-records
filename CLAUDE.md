@@ -74,8 +74,8 @@ State is managed in `App.tsx` and propagated to child components via props.
 - Transcript and generated note are session-only (not persisted)
 
 **7. Model Configuration**
-- Transcription model: `gemini-2.5-flash` (defined in `gemini-client.ts`)
-- Note generation model: `gemini-2.5-pro` (defined in `gemini-client.ts`)
+- Transcription model: `gemini-3.5-transcribe` (defined in `gemini-client.ts`)
+- Note generation model: `gemini-3.8-flash` (defined in `gemini-client.ts`)
 - API key stored in localStorage (client-side only, no backend)
 
 ### Module Responsibilities
@@ -131,9 +131,9 @@ Central types defined in `src/types/index.ts`:
 ## Important Implementation Notes
 
 ### Gemini API Usage
-- Uses `@google/genai` v0.3.1+
+- Uses `@google/genai` v3.6.1+
 - API structure: `genAI.models.generateContent()` with `config.systemInstruction`
-- Transcription model: `gemini-2.5-flash`; note generation model: `gemini-2.5-pro`
+- Transcription model: `gemini-3.5-transcribe`; note generation model: `gemini-3.8-flash`
 - Transcription prompt lives in `src/content/transcription-prompt.ts`
 - Note generation uses the template's `systemPrompt` as `systemInstruction`, with transcript and optional template `content` as user message parts
 

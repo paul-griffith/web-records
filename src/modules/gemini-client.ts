@@ -3,8 +3,8 @@ import { GoogleGenAI } from '@google/genai';
 import { abbreviations } from "../content/abbreviations";
 import { TRANSCRIPTION_PROMPT } from "../content/transcription-prompt";
 
-const transcriptionModel = 'gemini-2.5-flash';
-const analysisModel = 'gemini-2.5-pro';
+const transcriptionModel = 'gemini-3.5-transcribe';
+const analysisModel = 'gemini-3.8-flash';
 
 export class GeminiClient {
   private genAI: GoogleGenAI;
@@ -174,7 +174,7 @@ export class GeminiClient {
   async testApiKey(): Promise<boolean> {
     try {
       const response = await this.genAI.models.generateContent({
-        model: transcriptionModel,
+        model: analysisModel,
         contents: 'Hello'
       });
       return !!(response && response.text);
