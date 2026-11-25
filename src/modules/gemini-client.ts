@@ -3,7 +3,7 @@ import { GoogleGenAI } from '@google/genai';
 import { abbreviations } from "../content/abbreviations";
 import { TRANSCRIPTION_PROMPT } from "../content/transcription-prompt";
 
-const transcriptionModel = 'gemini-3.5-transcribe';
+const transcriptionModel = 'gemini-3.8-flash';
 const analysisModel = 'gemini-3.8-flash';
 
 export class GeminiClient {
